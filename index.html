@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>Cyberpunk Yaşayan Şehir</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="./styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Electrolize&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -15,16 +13,15 @@
     <div id="cursor-light"></div>
 
     <script>
-        // --- Genel Tanımlamalar ve Canvas Kurulumu ---
-        let w = window.innerWidth;
-        let h = window.innerHeight;
+        // Canvas ve Context'ler
+        let w = window.innerWidth, h = window.innerHeight;
         const starsCanvas = document.getElementById('stars');
         const sCtx = starsCanvas.getContext('2d');
         const cityCanvas = document.getElementById('city');
         const cCtx = cityCanvas.getContext('2d');
         const cursor = document.getElementById('cursor-light');
 
-        // --- Boyutlandırma Fonksiyonu ---
+        // --- Boyutlandırma ve Yeniden Boyutlandırma ---
         function resizeAll() {
             w = window.innerWidth;
             h = window.innerHeight;
@@ -32,23 +29,20 @@
             starsCanvas.height = h;
             cityCanvas.width = w;
             cityCanvas.height = h;
-
-            // Boyutlandırma sonrası elementleri yeniden başlatma
             initStars();
-            initBuildings(); // Binaların da yeniden oluşturulması önemli
-            initShips();     // Gemilerin de yeniden başlatılması
+            // initBuildings ve initShips fonksiyonlarını burada tekrar çağırmak,
+            // ekran boyutu değiştiğinde binaların ve gemilerin konumlarının
+            // doğru yeniden hesaplanmasını sağlar.
+            initBuildings();
+            initShips();
         }
 
-        // --- Event Dinleyicileri ---
         window.addEventListener('resize', resizeAll);
-        // Sayfa yüklendiğinde veya yeniden boyutlandırıldığında çalıştır
-        resizeAll(); 
+        resizeAll(); // Sayfa yüklendiğinde ilk boyutlandırma
 
-        // --- İmleç Takip (Cursor Follow) ---
-        let targetX = w / 2;
-        let targetY = h / 2;
-        let currentX = targetX;
-        let currentY = targetY;
+        // --- İmleç Takip (Easing ve Darbe Efekti) ---
+        let targetX = w / 2, targetY = h / 2;
+        let currentX = targetX, currentY = targetY;
         const ease = 0.15; // Yumuşatma faktörü
 
         function onPointerMove(x, y) {
@@ -61,11 +55,14 @@
             }, 200); // 200ms sonra 'active' sınıfını kaldır
         }
 
+        // Mouse ve dokunmatik olay dinleyicileri
         window.addEventListener('mousemove', e => onPointerMove(e.clientX, e.clientY));
         window.addEventListener('touchmove', e => {
-            const t = e.touches[0];
-            onPointerMove(t.clientX, t.clientY);
-        }, { passive: true });
+            if (e.touches.length > 0) {
+                const t = e.touches[0];
+                onPointerMove(t.clientX, t.clientY);
+            }
+        }, { passive: true }); // Dokunmatik olaylarda pasif dinleyici
 
         function animateCursor() {
             const dx = targetX - currentX;
@@ -82,10 +79,10 @@
         window.addEventListener('mouseout', () => { cursor.style.opacity = 0; });
         window.addEventListener('mouseover', () => { cursor.style.opacity = 1; });
 
-        // --- Yıldızlar (Stars) ---
+        // --- Yıldızlar ---
         let stars = [];
         function initStars() {
-            stars = []; // Mevcut yıldızları temizle
+            stars = [];
             for (let i = 0; i < 200; i++) {
                 stars.push({
                     x: Math.random() * w,
@@ -109,10 +106,11 @@
             });
             requestAnimationFrame(drawStars);
         }
-        initStars(); // Başlangıçta yıldızları oluştur
-        drawStars(); // Yıldız animasyonunu başlat
+        // initStars() ve drawStars() resizeAll içinde zaten çağrılıyor.
+        // Ancak ilk yüklemede çağrılmalarını garanti altına alalım.
+        // (resizeAll() zaten çağırıyor ama manuel çağrı da işe yarar)
 
-        // --- Binalar (Buildings) ---
+        // --- Binalar (Geliştirilmiş ve Gerçekçi) ---
         class Building {
             constructor(x, width, height, baseHue) {
                 this.x = x;
@@ -209,7 +207,9 @@
                         ctx.shadowBlur = 0;
                     } else if (detail.type === 'sign') {
                         ctx.save();
-                        ctx.font = `${Math.min(20, detail.width * 0.8)}px 'Electrolize', sans-serif`;
+                        // Font boyutu için min/max kontrolü
+                        const fontSize = Math.min(20, this.width * 0.2); // Bina genişliğine göre ayarla
+                        ctx.font = `${fontSize}px 'Electrolize', sans-serif`;
                         ctx.textAlign = 'center';
                         ctx.fillStyle = detail.color;
                         ctx.shadowColor = detail.color;
@@ -220,11 +220,16 @@
                 });
             }
 
-            // Pencerelerin sürekli titreşim efekti
+            flicker() {
+                const idx = Math.floor(Math.random() * this.windows.length);
+                const w = this.windows[idx];
+                w.alpha = w.alpha > 0.1 ? 0 : (0.7 + Math.random() * 0.3);
+            }
+
             updateWindows() {
-                this.windows.forEach(w_ => { // w'nin adını w_ olarak değiştirdim çakışmaması için
-                    if (Math.random() < w_.flickerRate) {
-                        w_.alpha = w_.alpha > 0.1 ? 0 : (0.7 + Math.random() * 0.3);
+                this.windows.forEach(w => {
+                    if (Math.random() < w.flickerRate) {
+                        w.alpha = w.alpha > 0.1 ? 0 : (0.7 + Math.random() * 0.3);
                     }
                 });
             }
@@ -250,7 +255,6 @@
         }
 
         function drawBuildings() {
-            // Sadece binaları çizeceğimiz alanı temizle
             cCtx.clearRect(0, 0, w, h);
             buildings.forEach(b => {
                 b.draw(cCtx);
@@ -259,10 +263,11 @@
             requestAnimationFrame(drawBuildings);
         }
 
-        initBuildings(); // Başlangıçta binaları oluştur
-        drawBuildings(); // Bina animasyonunu başlat
+        // Binaları başlat
+        // initBuildings() ve drawBuildings() zaten resizeAll içinde çağrılıyor.
+        // Ancak ilk yüklemede çağrılmalarını garanti altına alalım.
 
-        // --- Gemiler (Ships) ---
+        // --- Gemiler (Daha çeşitli ve detaylı) ---
         class Ship {
             constructor() {
                 this.reset();
@@ -374,12 +379,29 @@
             for (let i = 0; i < 7; i++) ships.push(new Ship());
         }
         function drawShips() {
-            // Gemileri çizeceğimiz alanı temizlemeye gerek yok, binalar zaten temizliyor
+            // Her karede temizleme, gemilerin arkasında iz bırakmamak için önemli
+            // Ancak şehir canvas'ı (cityCanvas) üzerine çizildiği için,
+            // drawBuildings fonksiyonu zaten clearRect yapıyor.
+            // Bu nedenle burada tekrar clearRect yapmaya gerek yok.
+            // cCtx.clearRect(0, 0, w, h); // Zaten drawBuildings() tarafından yapılıyor
+
             ships.forEach(s => { s.update(); s.draw(cCtx); });
             requestAnimationFrame(drawShips);
         }
-        initShips(); // Başlangıçta gemileri oluştur
-        drawShips(); // Gemi animasyonunu başlat
+        // initShips() ve drawShips() resizeAll içinde zaten çağrılıyor.
+        // Ancak ilk yüklemede çağrılmalarını garanti altına alalım.
+
+        // Tüm animasyon döngülerini başlatma
+        // initStars(), initBuildings(), initShips() fonksiyonları
+        // resizeAll() içinde zaten çağrılıyor, bu da ilk yüklemede boyutlandırma
+        // ve başlangıç değerlerini ayarlıyor.
+        // drawStars(), drawBuildings(), drawShips() fonksiyonları
+        // kendi içlerinde requestAnimationFrame ile sürekli olarak tekrar çağrıldıkları için
+        // bir kez başlatılmaları yeterlidir.
+        drawStars();
+        drawBuildings();
+        drawShips();
+
     </script>
 </body>
 </html>
