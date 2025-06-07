@@ -4,23 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Cyberpunk Yaşayan Şehir</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400&display=swap');
-    * { margin:0; padding:0; box-sizing:border-box; }
-    html, body {
-      width:100%; height:100%; overflow:hidden;
-      background: linear-gradient(180deg, #000011 0%, #000011 65%, #220044 100%);
-      cursor:none; font-family:'Orbitron', monospace;
-    }
-    canvas { position:fixed; top:0; left:0; width:100vw; height:100vh; pointer-events:none; }
-    #cursor-light {
-      position:fixed; pointer-events:none;
-      width:60px; height:60px; border-radius:50%;
-      background:radial-gradient(circle, rgba(187,136,255,0.6) 0%, transparent 70%);
-      mix-blend-mode:screen; transform:translate(-50%,-50%);
-      z-index:2;
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <canvas id="stars"></canvas>
@@ -28,135 +12,189 @@
   <div id="cursor-light"></div>
 
   <script>
-    // --- Setup ---
+    // --- Genel boyutlar & resize ---
     let w = window.innerWidth, h = window.innerHeight;
     const starsCanvas = document.getElementById('stars'), sCtx = starsCanvas.getContext('2d');
-    const cityCanvas = document.getElementById('city'), cCtx = cityCanvas.getContext('2d');
-    const cursor = document.getElementById('cursor-light');
+    const cityCanvas  = document.getElementById('city'),  cCtx = cityCanvas.getContext('2d');
+    const cursor      = document.getElementById('cursor-light');
 
-    function resize() {
+    function resizeAll() {
       w = window.innerWidth; h = window.innerHeight;
-      starsCanvas.width = w; starsCanvas.height = h;
-      cityCanvas.width = w; cityCanvas.height = h;
+      starsCanvas.width = cityCanvas.width = w;
+      starsCanvas.height = cityCanvas.height = h;
       initStars(); initBuildings(); initShips();
     }
-    window.addEventListener('resize', resize);
+    window.addEventListener('resize', resizeAll);
+    resizeAll();
 
-    // --- Cursor tracking ---
-    function moveCursor(x,y) { cursor.style.left = x+'px'; cursor.style.top = y+'px'; }
-    window.addEventListener('mousemove', e => moveCursor(e.clientX,e.clientY));
-    window.addEventListener('touchmove', e => { const t=e.touches[0]; moveCursor(t.clientX,t.clientY); }, {passive:true});
+    // --- İmleç takip ---
+    function moveCursor(x,y) {
+      cursor.style.transform = `translate(${x}px,${y}px)`;
+    }
+    window.addEventListener('mousemove', e => moveCursor(e.clientX, e.clientY));
+    window.addEventListener('touchmove', e => {
+      const t = e.touches[0];
+      moveCursor(t.clientX, t.clientY);
+    }, {passive:true});
 
     // --- Stars ---
     let stars = [];
     function initStars() {
       stars = [];
-      for(let i=0;i<150;i++) stars.push({
-        x:Math.random()*w, y:Math.random()*h,
-        r:Math.random()*1.5,
-        a:Math.random(), d:0.004+Math.random()*0.02
-      });
+      for (let i = 0; i < 150; i++) {
+        stars.push({
+          x: Math.random()*w,
+          y: Math.random()*h,
+          r: Math.random()*1.5,
+          a: Math.random(),
+          d: 0.004 + Math.random()*0.02
+        });
+      }
     }
     function drawStars() {
       sCtx.clearRect(0,0,w,h);
-      stars.forEach(s=>{
-        s.a += s.d; if(s.a<=0||s.a>=1) s.d*=-1;
-        sCtx.beginPath(); sCtx.arc(s.x,s.y,s.r,0,2*Math.PI);
-        sCtx.fillStyle = `rgba(245,230,204,${s.a})`; sCtx.fill();
+      stars.forEach(s => {
+        s.a += s.d;
+        if (s.a <= 0 || s.a >= 1) s.d *= -1;
+        sCtx.beginPath();
+        sCtx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+        sCtx.fillStyle = `rgba(245,230,204,${s.a})`;
+        sCtx.fill();
       });
       requestAnimationFrame(drawStars);
     }
+    drawStars();
 
     // --- Buildings ---
     class Building {
-      constructor(x,wid,height) {
-        this.x = x; this.wid = wid; this.height = height;
+      constructor(x,wid,ht) {
+        this.x = x; this.wid = wid; this.ht = ht;
         this.windows = [];
-        const cols = Math.floor(wid/15), rows = Math.floor(height/25);
-        for(let r=0; r<rows; r++) {
-          for(let c=0; c<cols; c++) {
+        const cols = Math.floor(wid/15), rows = Math.floor(ht/25);
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
             const px = x + c*(wid/cols) + (wid/cols)/2;
-            const py = h - (r*25 + 12 + (h - height));
-            const rnd = Math.random(); let color=null;
-            if(rnd<0.2) color='green'; else if(rnd<0.4) color='blue'; else if(rnd<0.6) color='pink';
+            const py = h - (r*25 + 12 + (h - ht));
+            const rnd = Math.random();
+            let color = null;
+            if (rnd < 0.2) color = 'green';
+            else if (rnd < 0.4) color = 'blue';
+            else if (rnd < 0.6) color = 'pink';
             this.windows.push({x:px, y:py, r:6, color, alpha: color?1:0});
           }
         }
       }
       draw(ctx) {
-        // Body
-        ctx.fillStyle='#220022'; ctx.strokeStyle='#7a3cff'; ctx.lineWidth=2;
-        ctx.fillRect(this.x, h-this.height, this.wid, this.height);
-        ctx.strokeRect(this.x, h-this.height, this.wid, this.height);
-        // Windows
+        ctx.fillStyle   = '#220022';
+        ctx.strokeStyle = '#7a3cff';
+        ctx.lineWidth   = 2;
+        ctx.fillRect(this.x, h-this.ht, this.wid, this.ht);
+        ctx.strokeRect(this.x, h-this.ht, this.wid, this.ht);
+
         this.windows.forEach(wnd => {
-          if(wnd.color) {
-            let col;
-            if(wnd.color==='green') col=`rgba(160,255,140,${wnd.alpha})`;
-            if(wnd.color==='blue') col=`rgba(140,218,255,${wnd.alpha})`;
-            if(wnd.color==='pink') col=`rgba(255,140,218,${wnd.alpha})`;
-            ctx.save(); ctx.beginPath(); ctx.arc(wnd.x, wnd.y, wnd.r,0,2*Math.PI);
-            ctx.fillStyle=col; ctx.shadowColor=col; ctx.shadowBlur=8; ctx.fill(); ctx.restore();
-          }
+          if (!wnd.color) return;
+          let col;
+          if (wnd.color==='green') col = `rgba(160,255,140,${wnd.alpha})`;
+          if (wnd.color==='blue')  col = `rgba(140,218,255,${wnd.alpha})`;
+          if (wnd.color==='pink')  col = `rgba(255,140,218,${wnd.alpha})`;
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(wnd.x, wnd.y, wnd.r, 0, 2*Math.PI);
+          ctx.fillStyle = col;
+          ctx.shadowColor = col;
+          ctx.shadowBlur = 8;
+          ctx.fill();
+          ctx.restore();
         });
       }
       flicker() {
         const idx = Math.floor(Math.random()*this.windows.length);
         const w = this.windows[idx];
-        if(w.color) { w.alpha=0; setTimeout(()=>w.alpha=1,200+Math.random()*800); }
-        else { const cols=['green','blue','pink']; w.color=cols[Math.floor(Math.random()*3)]; w.alpha=1; setTimeout(()=>w.color=null,200+Math.random()*800); }
+        if (w.color) {
+          w.alpha = 0;
+          setTimeout(() => w.alpha = 1, 200 + Math.random()*800);
+        } else {
+          const cols = ['green','blue','pink'];
+          w.color = cols[Math.floor(Math.random()*3)];
+          w.alpha = 1;
+          setTimeout(() => w.color = null, 200 + Math.random()*800);
+        }
       }
     }
-    let buildings=[];
+
+    let buildings = [];
     function initBuildings() {
-      buildings=[];
+      buildings = [];
       const count = Math.ceil(w/150);
-      for(let i=0;i<count;i++) {
+      for (let i = 0; i < count; i++) {
         const wid = 80 + Math.random()*60;
-        const ht = 120 + Math.random()*(h*0.6);
-        const x = i*(w/count) + (Math.random()*30-15);
-        buildings.push(new Building(x,wid,ht));
+        const ht  = 120 + Math.random()*(h*0.6);
+        const x   = i*(w/count) + (Math.random()*30 - 15);
+        buildings.push(new Building(x, wid, ht));
       }
     }
     function drawBuildings() {
       cCtx.clearRect(0,0,w,h);
-      buildings.forEach(b=>b.draw(cCtx));
+      buildings.forEach(b => b.draw(cCtx));
       requestAnimationFrame(drawBuildings);
     }
+    setInterval(() => {
+      const b = buildings[Math.floor(Math.random()*buildings.length)];
+      b.flicker();
+    }, 120);
+    drawBuildings();
 
-    // --- Spaceships ---
+    // --- Ships ---
     class Ship {
       constructor() {
-        this.x = -50; this.y = Math.random() * h * 0.5 + 50;
+        this.reset();
+      }
+      reset() {
+        this.x = -50;
+        this.y = Math.random()*h*0.5 + 50;
         this.vx = 2 + Math.random()*3;
         this.color = ['cyan','magenta','yellow','white'][Math.floor(Math.random()*4)];
-        this.size = 20 + Math.random()*30;
-        // random shape: type 0 circle, type1 triangle, type2 rect
-        this.type = Math.floor(Math.random()*3);
+        this.size  = 20 + Math.random()*30;
+        this.type  = Math.floor(Math.random()*3);
+      }
+      update() {
+        this.x += this.vx;
+        if (this.x > w + 50) this.reset();
       }
       draw(ctx) {
-        ctx.save(); ctx.translate(this.x, this.y);
+        ctx.save();
+        ctx.translate(this.x, this.y);
         ctx.fillStyle = this.color;
         ctx.globalAlpha = 0.8;
-        if(this.type===0) ctx.beginPath(), ctx.arc(0,0,this.size*0.6,0,2*Math.PI), ctx.fill();
-        else if(this.type===1) ctx.beginPath(), ctx.moveTo(-this.size, this.size/2), ctx.lineTo(this.size,0), ctx.lineTo(-this.size,-this.size/2), ctx.closePath(), ctx.fill();
-        else ctx.fillRect(-this.size*0.5, -this.size*0.3, this.size, this.size*0.6);
+        if (this.type === 0) {
+          ctx.beginPath();
+          ctx.arc(0,0,this.size*0.6,0,2*Math.PI);
+          ctx.fill();
+        } else if (this.type === 1) {
+          ctx.beginPath();
+          ctx.moveTo(-this.size, this.size/2);
+          ctx.lineTo( this.size, 0);
+          ctx.lineTo(-this.size,-this.size/2);
+          ctx.closePath();
+          ctx.fill();
+        } else {
+          ctx.fillRect(-this.size*0.5, -this.size*0.3, this.size, this.size*0.6);
+        }
         ctx.restore();
       }
-      update() { this.x += this.vx; if(this.x> w+50) this.x = -50; }
     }
-    let ships=[];
-    function initShips() { ships = []; for(let i=0;i<5;i++) ships.push(new Ship()); }
+
+    let ships = [];
+    function initShips() {
+      ships = [];
+      for (let i = 0; i < 5; i++) ships.push(new Ship());
+    }
     function drawShips() {
-      ships.forEach(s=>{ s.update(); s.draw(cCtx); });
+      ships.forEach(s => { s.update(); s.draw(cCtx); });
       requestAnimationFrame(drawShips);
     }
+    initShips(); drawShips();
 
-    // --- Flicker loop ---
-    function startFlicker() { setInterval(()=>{ buildings[Math.floor(Math.random()*buildings.length)].flicker(); },120); }
-
-    // --- Init everything ---
-    resize(); drawStars(); initBuildings(); drawBuildings(); initShips(); drawShips(); startFlicker();
   </script>
 </body>
 </html>
