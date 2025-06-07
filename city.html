@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cyberpunk Şehir</title>
+  <title>Cyberpunk Şehir - Ana Sayfa</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400&display=swap');
 
@@ -12,12 +12,37 @@
       background: linear-gradient(180deg, #220044 0%, #000011 80%);
       font-family: 'Orbitron', monospace;
       overflow: hidden;
+      position: relative;
+      cursor: none;
+    }
+
+    nav {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      display: flex;
+      gap: 20px;
+    }
+    nav a {
+      color: #f5e6cc;
+      text-decoration: none;
+      padding: 8px 16px;
+      border: 1px solid #f5e6cc;
+      border-radius: 4px;
+      transition: background 0.3s, color 0.3s;
+    }
+    nav a:hover {
+      background: #f5e6cc;
+      color: #220044;
     }
 
     #city {
       position: relative;
       width: 100vw;
       height: 100vh;
+      z-index: 1;
     }
 
     .building {
@@ -35,7 +60,7 @@
       height: 12px;
       margin: 3px auto;
       border-radius: 2px;
-      background: #2a001f; /* kapalı */
+      background: #2a001f;
       box-shadow: 0 0 2px #000;
       transition: background 0.3s, box-shadow 0.3s;
     }
@@ -44,28 +69,53 @@
       background: #f5e6cc;
       box-shadow: 0 0 4px #f5e6ccaa, 0 0 8px #bb88ff55;
     }
+
+    #stars {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    #cursor-light {
+      position: fixed;
+      pointer-events: none;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(187,136,255,0.7) 0%, transparent 70%);
+      mix-blend-mode: screen;
+      transform: translate(-50%, -50%);
+      z-index: 5;
+      transition: width 0.2s ease, height 0.2s ease;
+    }
   </style>
 </head>
 <body>
+
+  <nav>
+    <a href="index.html">Ana Sayfa</a>
+    <a href="city.html">Şehir</a>
+    <a href="ships.html">Gemi</a>
+  </nav>
+
   <div id="city"></div>
+  <canvas id="stars"></canvas>
+  <div id="cursor-light"></div>
 
   <script>
+    // City setup (binalar)
     const city = document.getElementById('city');
-
-    // Şehrin yatayda kapladığı alana göre bina sayısı
     const buildingCount = Math.ceil(window.innerWidth / 80);
-
-    // Her binayı oluştur
     for (let i = 0; i < buildingCount; i++) {
       const b = document.createElement('div');
       b.classList.add('building');
-      // Konum ve yükseklik rastgele
       const x = i * 80 + Math.random() * 20 - 10;
       const height = 100 + Math.random() * (window.innerHeight * 0.6);
       b.style.left = x + 'px';
       b.style.height = height + 'px';
-
-      // Pencere satır/sütun sayısı
       const cols = 4;
       const rows = Math.floor(height / 30);
       for (let r = 0; r < rows; r++) {
@@ -73,37 +123,65 @@
         row.style.display = 'flex';
         row.style.justifyContent = 'space-around';
         row.style.marginTop = '4px';
-
         for (let c = 0; c < cols; c++) {
           const w = document.createElement('div');
           w.classList.add('window');
-          // Başlangıçta ışık açık/kapatılmış
           if (Math.random() < 0.3) w.classList.add('on');
           row.appendChild(w);
         }
         b.appendChild(row);
       }
-
       city.appendChild(b);
     }
-
-    // Rastgele pencerelerde arada sırada yanıp sönen efekt
     setInterval(() => {
-      // Tüm pencereler arasından bir tane seç
-      const allWindows = document.querySelectorAll('.window');
-      if (!allWindows.length) return;
-      const idx = Math.floor(Math.random() * allWindows.length);
-      const w = allWindows[idx];
-      // Hemen tersine çevir (on → off, off → on), sonra bir süre sonra geri
+      const all = document.querySelectorAll('.window');
+      if (!all.length) return;
+      const idx = Math.floor(Math.random() * all.length);
+      const w = all[idx];
       w.classList.toggle('on');
       setTimeout(() => w.classList.toggle('on'), 300 + Math.random() * 700);
     }, 200);
 
-    // Pencere sayısını resize ile güncelle
-    window.addEventListener('resize', () => {
-      // Yenileme yerine sayfayı yeniden yüklemek daha pratik
-      location.reload();
-    });
+    window.addEventListener('resize', () => location.reload());
+
+    // Stars animation
+    const canvas = document.getElementById('stars');
+    const ctx = canvas.getContext('2d');
+    let w, h, stars = [];
+    function initStars() {
+      w = window.innerWidth; h = window.innerHeight;
+      canvas.width = w; canvas.height = h;
+      stars = [];
+      for (let i = 0; i < 200; i++) {
+        stars.push({ x: Math.random() * w, y: Math.random() * h, r: Math.random() * 1.5, alpha: Math.random(), delta: 0.005 + Math.random() * 0.02 });
+      }
+    }
+    function animateStars() {
+      ctx.clearRect(0, 0, w, h);
+      stars.forEach(s => {
+        s.alpha += s.delta;
+        if (s.alpha <= 0 || s.alpha >= 1) s.delta *= -1;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(245,230,204,${s.alpha})`;
+        ctx.fill();
+      });
+      requestAnimationFrame(animateStars);
+    }
+    initStars(); animateStars();
+    window.addEventListener('resize', initStars);
+
+    // Cursor light
+    const cursor = document.getElementById('cursor-light');
+    function moveCursor(x, y) {
+      cursor.style.left = x + 'px';
+      cursor.style.top = y + 'px';
+    }
+    window.addEventListener('mousemove', e => moveCursor(e.clientX, e.clientY));
+    window.addEventListener('touchmove', e => {
+      const t = e.touches[0]; moveCursor(t.clientX, t.clientY);
+    }, { passive: true });
+
   </script>
 </body>
 </html>
