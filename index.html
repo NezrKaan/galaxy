@@ -2,188 +2,143 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-<title>Space Cowboy Terminal</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Space Cowboy</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
 
   body {
     margin: 0;
     min-height: 100vh;
     background: #1a002f;
-    color: #d8b4fe;
+    color: #c18aff;
     font-family: 'Orbitron', monospace, monospace;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    overflow: hidden;
-    padding: 20px;
-    text-align: center;
+    padding: 40px 20px;
+    overflow-x: hidden;
   }
 
   h1 {
     font-size: 4rem;
+    color: #e09aff;
     text-shadow:
-      0 0 5px #d8b4fe,
-      0 0 10px #d8b4fe,
-      0 0 20px #a46ee5,
-      0 0 40px #a46ee5,
-      0 0 80px #7c43ff;
-    animation: flicker 3s infinite;
-    margin: 0 0 20px 0;
-    line-height: 1.1;
+      0 0 10px #c18aff,
+      0 0 20px #a052ff,
+      0 0 40px #7b1fff;
+    margin: 0 0 10px 0;
+    letter-spacing: 0.15em;
+    user-select: none;
   }
 
-  p {
+  p.subtitle {
     font-size: 1.5rem;
-    color: #b793f9;
-    text-shadow: 0 0 10px #b793f9;
-    animation: pulse 4s infinite;
+    color: #b288f9;
+    text-shadow: 0 0 8px #b288f9;
     margin: 0 0 40px 0;
+    user-select: none;
   }
 
-  .stars {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    top: 0; left: 0;
-    pointer-events: none;
-    background: transparent;
-    z-index: 0;
-  }
-
-  .star {
-    position: absolute;
-    background: #fff;
-    border-radius: 50%;
-    opacity: 0.8;
-    animation: twinkle infinite;
-  }
-
-  .social-container {
+  .cards {
     display: flex;
-    gap: 40px;
-    justify-content: center;
     flex-wrap: wrap;
-    max-width: 300px;
-    z-index: 1;
-  }
-
-  .social-container a {
-    color: #d8b4fe;
-    font-size: 3rem;
-    transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.3s ease;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
+    gap: 25px;
+    max-width: 900px;
     justify-content: center;
   }
 
-  .social-container a:hover {
-    color: #7c43ff;
-    text-shadow:
-      0 0 10px #7c43ff,
-      0 0 20px #d8b4fe;
-    transform: scale(1.2) rotate(10deg);
+  .card {
+    background: #2d0055;
+    border: 2px solid #b288f9;
+    border-radius: 15px;
+    width: 260px;
+    height: 160px;
+    box-shadow:
+      0 0 8px #b288f9,
+      inset 0 0 10px #7b1fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #d0bfff;
+    font-size: 1.2rem;
+    text-align: center;
+    cursor: default;
+    user-select: none;
+    transition: box-shadow 0.3s ease;
   }
 
-  /* VSCO için SVG özel stili */
-  .vsco-icon {
-    width: 1em;
-    height: 1em;
-    fill: currentColor;
+  .card:hover {
+    box-shadow:
+      0 0 20px #c18aff,
+      inset 0 0 25px #9c3fff,
+      0 0 40px #7b1fff;
   }
 
-  @keyframes flicker {
-    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-      opacity: 1;
-      text-shadow:
-        0 0 5px #d8b4fe,
-        0 0 10px #d8b4fe,
-        0 0 20px #a46ee5,
-        0 0 40px #a46ee5,
-        0 0 80px #7c43ff;
-    }
-    20%, 22%, 24%, 55% {
-      opacity: 0.6;
-      text-shadow: none;
-    }
+  .social-links {
+    margin-top: 50px;
+    display: flex;
+    gap: 30px;
   }
 
-  @keyframes pulse {
-    0%, 100% {
-      opacity: 1;
-      text-shadow: 0 0 10px #b793f9;
-    }
-    50% {
-      opacity: 0.7;
-      text-shadow: 0 0 30px #b793f9;
-    }
+  .social-links a {
+    color: #b288f9;
+    text-decoration: none;
+    font-size: 2rem;
+    transition: color 0.3s ease;
   }
 
-  @keyframes twinkle {
-    0%, 100% {opacity: 0.8;}
-    50% {opacity: 0.3;}
+  .social-links a:hover {
+    color: #e09aff;
   }
 
+  footer {
+    margin-top: 60px;
+    font-size: 1.3rem;
+    color: #c18aff;
+    text-shadow: 0 0 8px #b288f9;
+    user-select: none;
+  }
+
+  /* Responsive */
   @media (max-width: 600px) {
     h1 {
-      font-size: 2.5rem;
+      font-size: 2.8rem;
     }
-    p {
-      font-size: 1.2rem;
+    p.subtitle {
+      font-size: 1.1rem;
       margin-bottom: 30px;
     }
-    .social-container {
-      gap: 30px;
-    }
-    .social-container a {
-      font-size: 2.4rem;
+    .card {
+      width: 90vw;
+      max-width: 350px;
+      height: 140px;
+      font-size: 1rem;
     }
   }
 </style>
+<!-- FontAwesome CDN for social icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 <body>
 
-  <h1>See you, space cowboy...</h1>
-  <p>Welcome to the neon edge of cyberspace.</p>
+  <h1>SPACE COWBOY</h1>
+  <p class="subtitle">Riding the neon waves of cyberspace...</p>
 
-  <div class="social-container">
-    <a href="https://linkedin.com/in/username" target="_blank" aria-label="LinkedIn">
-      <i class="fab fa-linkedin"></i>
-    </a>
-    <a href="https://instagram.com/username" target="_blank" aria-label="Instagram">
-      <i class="fab fa-instagram"></i>
-    </a>
-    <a href="https://vsco.co/username" target="_blank" aria-label="VSCO">
-      <svg class="vsco-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-        <circle cx="32" cy="32" r="30" stroke="currentColor" stroke-width="4" fill="none"/>
-        <circle cx="32" cy="32" r="20" stroke="currentColor" stroke-width="4" fill="none"/>
-        <circle cx="32" cy="32" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
-      </svg>
-    </a>
+  <div class="cards">
+    <div class="card">Project One - Coming Soon</div>
+    <div class="card">Project Two - In Progress</div>
+    <div class="card">Storyline - TBD</div>
+    <div class="card">More to Come...</div>
   </div>
 
-  <div class="stars"></div>
+  <div class="social-links">
+    <a href="https://linkedin.com/in/yourprofile" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+    <a href="https://instagram.com/yourprofile" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+    <a href="https://vsco.co/yourprofile" target="_blank" aria-label="VSCO"><i class="fas fa-camera-retro"></i></a>
+  </div>
 
-  <script>
-    const starsContainer = document.querySelector('.stars');
-    const starCount = 80;
-
-    for(let i=0; i < starCount; i++) {
-      const star = document.createElement('div');
-      star.classList.add('star');
-      const size = Math.random() * 2 + 1;
-      star.style.width = size + 'px';
-      star.style.height = size + 'px';
-      star.style.top = (Math.random() * 100) + '%';
-      star.style.left = (Math.random() * 100) + '%';
-      star.style.animationDuration = (Math.random() * 3 + 2) + 's';
-      starsContainer.appendChild(star);
-    }
-  </script>
+  <footer>See you, space cowboy...</footer>
 
 </body>
 </html>
