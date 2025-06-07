@@ -1,21 +1,261 @@
+:root {
+    /* Genel renk paleti ve animasyon değerleri için CSS değişkenleri */
+    --bg-dark-color: #0c001a;
+    --neon-blue: hsl(210, 100%, 65%);
+    --neon-purple: hsl(270, 100%, 70%);
+    --neon-green: hsl(120, 100%, 60%);
+    --neon-red: hsl(0, 100%, 60%);
+    --neon-yellow: hsl(50, 100%, 70%);
+
+    --building-base-saturation: 50%;
+    --building-base-lightness: 15%;
+
+    --window-light-saturation: 100%;
+    --window-light-lightness: 70%;
+}
+
 body {
     margin: 0;
-    overflow: hidden; /* Kaydırma çubuklarını gizle */
-    background-color: #0c001a; /* Daha koyu, morumsu arka plan */
-    font-family: 'Electrolize', sans-serif; /* Fütüristik font */
-    cursor: default; /* Varsayılan imleci göster */
+    overflow: hidden;
+    background-color: var(--bg-dark-color);
+    font-family: 'Electrolize', sans-serif;
+    color: white; /* Metin renkleri için */
 }
 
-canvas {
-    position: absolute;
+#city-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden; /* Taşmaları gizle */
+}
+
+/* --- Yıldız Animasyonu (CSS ile) --- */
+/* Arka plan yıldızları için pseudo-element kullanalım */
+body::before {
+    content: '';
+    position: fixed; /* Ekranı sabitler */
     top: 0;
     left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: transparent;
+    z-index: -1; /* En arkada */
+    animation: twinkle 60s infinite linear; /* Yıldızları canlandır */
+    /* Birden fazla background ile yıldız efekti */
+    background-image: 
+        radial-gradient(2px 2px at 20px 30px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 80px 70px, #fff, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 150px 120px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 50% 30%, #fff, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 70% 80%, #fff, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 10% 90%, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 90% 10%, #fff, rgba(0,0,0,0));
+    background-repeat: repeat;
+    background-size: 200px 200px; /* Yıldızların tekrar deseni */
+    opacity: 0.8;
 }
 
-#starsCanvas {
-    z-index: 1; /* Yıldızlar en arkada */
+@keyframes twinkle {
+    0% { opacity: 0.8; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.98); }
+    100% { opacity: 0.8; transform: scale(1); }
 }
 
-#cityCanvas {
-    z-index: 2; /* Şehir ve gemiler yıldızların üzerinde */
+/* --- Binalar --- */
+.building {
+    position: absolute;
+    bottom: 0;
+    transform: translateZ(var(--depth-factor)); /* Derinlik için Z ekseninde hareket (perspective ile) */
+    transform-style: preserve-3d; /* 3D dönüşümler için */
+    perspective: 800px; /* 3D derinlik etkisi için */
+    overflow: hidden; /* Pencere taşmalarını engelle */
+
+    /* Bina gövdesinin rengi ve konturu CSS değişkenlerinden alınır */
+    background: linear-gradient(to top, 
+        hsla(var(--building-hue), var(--building-base-saturation), calc(var(--building-base-lightness) - var(--depth-factor) * 2%), 0.98),
+        hsla(var(--building-hue), var(--building-base-saturation), calc(var(--building-base-lightness) + 5% - var(--depth-factor) * 2%), 0.95)
+    );
+    border: 1.5px solid hsla(var(--building-hue), 70%, calc(40% - var(--depth-factor) * 3%), 1);
+    box-shadow: 0 0 calc(5px * var(--depth-factor)) rgba(0,0,0, calc(0.3 * var(--depth-factor))); /* Derinliğe göre hafif gölge */
 }
+
+/* Pencere Stilleri */
+.building .window {
+    position: relative;
+    float: left; /* Pencereler yan yana dizilir */
+    width: 60%; /* Orantılı pencere genişliği */
+    height: 70%; /* Orantılı pencere yüksekliği */
+    background-color: rgba(10, 0, 10, 0.2); /* Pencere boşluğunun koyu rengi */
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.5); /* İç gölge */
+
+    /* Titreyen ışık animasyonu */
+    animation: flicker var(--window-duration) infinite alternate var(--window-delay);
+}
+
+@keyframes flicker {
+    0%, 10% { background-color: hsla(calc(var(--building-hue) + var(--window-hue)), var(--window-light-saturation), var(--window-light-lightness), 0); } /* Kapalı */
+    10% { box-shadow: 0 0 0 transparent; }
+    20%, 80% { background-color: hsla(calc(var(--building-hue) + var(--window-hue)), var(--window-light-saturation), var(--window-light-lightness), 0.8); } /* Açık */
+    25%, 75% { box-shadow: 0 0 15px hsla(calc(var(--building-hue) + var(--window-hue)), var(--window-light-saturation), var(--window-light-lightness), 0.8); } /* Işıma */
+    90%, 100% { background-color: hsla(calc(var(--building-hue) + var(--window-hue)), var(--window-light-saturation), var(--window-light-lightness), 0); } /* Tekrar kapalı */
+}
+
+
+/* Bina Detayları */
+.building-detail {
+    position: absolute;
+    z-index: 10; /* Detaylar pencerelerin üzerinde olsun */
+}
+
+.building-detail.antenna {
+    width: 2px;
+    height: 50px; /* JavaScript tarafından ayarlanacak */
+    background-color: hsl(var(--building-hue), 40%, 30%);
+    top: -50px; /* Çatının üstünden başla */
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 5px red; /* Anten ucunda küçük ışık */
+}
+
+.building-detail.sign {
+    font-family: 'Electrolize', sans-serif;
+    font-size: calc(10px + var(--building-height) / 100); /* Bina yüksekliğine göre font boyutu */
+    text-align: center;
+    color: hsl(var(--sign-hue), 100%, 65%);
+    text-shadow: 0 0 15px hsl(var(--sign-hue), 100%, 65%), 0 0 25px hsl(var(--sign-hue), 100%, 40%);
+    white-space: nowrap; /* Metni tek satırda tut */
+    bottom: 20%; /* Binanın ortalarına doğru */
+    left: 50%;
+    transform: translateX(-50%);
+    animation: neon-pulse 3s infinite alternate ease-in-out;
+}
+
+@keyframes neon-pulse {
+    0%, 100% { opacity: 1; text-shadow: 0 0 15px currentColor, 0 0 25px currentColor; }
+    50% { opacity: 0.8; text-shadow: 0 0 5px currentColor, 0 0 10px currentColor; }
+}
+
+
+/* --- Gemiler --- */
+.ship {
+    position: absolute;
+    z-index: 15; /* Gemiler binaların ve yıldızların üzerinde olsun */
+    transform-style: preserve-3d;
+    animation:
+        fly-across var(--animation-duration) linear infinite var(--animation-delay),
+        float-vertical var(--vertical-speed) ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 10px hsla(var(--ship-hue), 100%, 65%, 0.7)); /* Genel gemi ışıması */
+}
+
+/* Gemilerin farklı tipleri için pseudo-elementler kullanalım */
+.ship::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: hsl(var(--ship-hue), 100%, 65%);
+    top: 0;
+    left: 0;
+    box-shadow: 0 0 15px hsl(var(--ship-hue), 100%, 65%); /* Genel gemi ışıması */
+}
+
+/* Tip 0: Basit hızlı gemi */
+.ship[style*="--ship-type: 0;"]::before {
+    clip-path: polygon(0% 20%, 100% 50%, 0% 80%, 10% 50%);
+}
+
+/* Tip 1: Geniş kargo gemisi */
+.ship[style*="--ship-type: 1;"]::before {
+    width: 80%; height: 60%;
+    top: 20%; left: 10%;
+    box-shadow: 0 0 20px hsl(var(--ship-hue), 100%, 65%), 0 0 30px hsl(var(--ship-hue), 100%, 40%);
+}
+.ship[style*="--ship-type: 1;"]::after { /* Kanatlar için pseudo-element */
+    content: '';
+    position: absolute;
+    width: 30%; height: 20%;
+    background-color: hsl(var(--ship-hue), 100%, 65%);
+    box-shadow: 0 0 10px hsl(var(--ship-hue), 100%, 65%);
+    top: 0; left: 35%; /* Üst kanat */
+    clip-path: polygon(0% 100%, 50% 0%, 100% 100%);
+    transform: rotate(180deg);
+}
+
+/* Tip 2: Kavisli fütüristik gemi */
+.ship[style*="--ship-type: 2;"]::before {
+    border-radius: 50% / 20%;
+    transform: scaleX(1.2);
+}
+
+/* Tip 3: Drone benzeri dörtlü gövde */
+.ship[style*="--ship-type: 3;"]::before {
+    background-color: transparent; /* Ana gövde yok */
+    box-shadow: none;
+}
+.ship[style*="--ship-type: 3;"]::after { /* Dört nokta için */
+    content: '';
+    position: absolute;
+    width: 20%; height: 20%;
+    background-color: hsl(var(--ship-hue), 100%, 65%);
+    border-radius: 50%;
+    box-shadow: 0 0 10px hsl(var(--ship-hue), 100%, 65%);
+    /* Konumlandırma */
+    top: 0; left: 0; transform: translate(-50%, -50%);
+    animation: drone-pulse 1s infinite alternate;
+}
+.ship[style*="--ship-type: 3;"]::before { /* Bu kural çakışabilir, kaldırdık */
+    /* yerine daha spesifik dört nokta ekleyelim */
+}
+/* Tip 3 için ayrı noktalar */
+.ship[style*="--ship-type: 3;"] {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 10px; /* Noktalar arası boşluk */
+    justify-items: center;
+    align-items: center;
+}
+.ship[style*="--ship-type: 3;"]::before,
+.ship[style*="--ship-type: 3;"]::after,
+.ship[style*="--ship-type: 3;"] > span:nth-of-type(1)::before,
+.ship[style*="--ship-type: 3;"] > span:nth-of-type(2)::before {
+    content: '';
+    display: block;
+    width: 15px; height: 15px;
+    background-color: hsl(var(--ship-hue), 100%, 65%);
+    border-radius: 50%;
+    box-shadow: 0 0 10px hsl(var(--ship-hue), 100%, 65%);
+    animation: drone-pulse 1s infinite alternate;
+}
+/* CSS grid ile dört nokta yerleşimi */
+.ship[style*="--ship-type: 3;"]::before { grid-area: 1 / 1; }
+.ship[style*="--ship-type: 3;"]::after { grid-area: 1 / 2; }
+/* Bu yöntemle 4 noktayı doğrudan CSS'ten oluşturmak daha zor,
+   JavaScript ile her nokta için bir div oluşturmak daha esnek olurdu.
+   Şimdilik 2 pseudo-element ile sınırlayalım veya HTML'i biraz genişletelim.
+   Basitlik adına, sadece ana şekli ve ışık efekti kalsın,
+   karmaşık drone tipi için JS'e dönmek daha mantıklı olur. */
+
+
+/* Gemilerin hareket animasyonu */
+@keyframes fly-across {
+    0% { transform: translateX(calc(-100vw - 200px)); } /* Ekran dışından başla */
+    100% { transform: translateX(calc(100vw + 200px)); } /* Ekran dışına kadar uç */
+}
+
+@keyframes float-vertical {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(var(--vertical-amplitude)); } /* Dikey genlik kadar hareket */
+}
+
+/* Gemi ışık izleri (yalın bir çizgi için) */
+/* Daha gelişmiş izler için JavaScript hala daha iyi bir seçenek olacaktır.
+   CSS ile sadece basit bir statik gölge efekti verebiliriz. */
+.ship::before {
+    /* Mevcut ışık izi için kullanılan box-shadow yerine */
+    box-shadow: 0 0 15px hsl(var(--ship-hue), 100%, 65%);
+}
+
+/* Yıldızların ışığı kaybolduğunda sıfırlama */
+sCtx.shadowBlur = 0; // Bu bir JS özelliği, CSS'te doğrudan kullanılamaz.
+/* CSS'te global shadow'u sıfırlamak yerine, element bazında tanımlamalıyız. */
