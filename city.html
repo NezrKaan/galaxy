@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cyberpunk Şehir</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400&display=swap');
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background: linear-gradient(180deg, #220044 0%, #000011 80%);
+      font-family: 'Orbitron', monospace;
+      overflow: hidden;
+    }
+
+    #city {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .building {
+      position: absolute;
+      bottom: 0;
+      width: 60px;
+      background: linear-gradient(180deg, #3a0066, #120022);
+      border: 2px solid #6e3ca0;
+      border-radius: 4px 4px 0 0;
+      box-shadow: 0 0 10px #8a54ff88;
+    }
+
+    .window {
+      width: 8px;
+      height: 12px;
+      margin: 3px auto;
+      border-radius: 2px;
+      background: #2a001f; /* kapalı */
+      box-shadow: 0 0 2px #000;
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+
+    .window.on {
+      background: #f5e6cc;
+      box-shadow: 0 0 4px #f5e6ccaa, 0 0 8px #bb88ff55;
+    }
+  </style>
+</head>
+<body>
+  <div id="city"></div>
+
+  <script>
+    const city = document.getElementById('city');
+
+    // Şehrin yatayda kapladığı alana göre bina sayısı
+    const buildingCount = Math.ceil(window.innerWidth / 80);
+
+    // Her binayı oluştur
+    for (let i = 0; i < buildingCount; i++) {
+      const b = document.createElement('div');
+      b.classList.add('building');
+      // Konum ve yükseklik rastgele
+      const x = i * 80 + Math.random() * 20 - 10;
+      const height = 100 + Math.random() * (window.innerHeight * 0.6);
+      b.style.left = x + 'px';
+      b.style.height = height + 'px';
+
+      // Pencere satır/sütun sayısı
+      const cols = 4;
+      const rows = Math.floor(height / 30);
+      for (let r = 0; r < rows; r++) {
+        const row = document.createElement('div');
+        row.style.display = 'flex';
+        row.style.justifyContent = 'space-around';
+        row.style.marginTop = '4px';
+
+        for (let c = 0; c < cols; c++) {
+          const w = document.createElement('div');
+          w.classList.add('window');
+          // Başlangıçta ışık açık/kapatılmış
+          if (Math.random() < 0.3) w.classList.add('on');
+          row.appendChild(w);
+        }
+        b.appendChild(row);
+      }
+
+      city.appendChild(b);
+    }
+
+    // Rastgele pencerelerde arada sırada yanıp sönen efekt
+    setInterval(() => {
+      // Tüm pencereler arasından bir tane seç
+      const allWindows = document.querySelectorAll('.window');
+      if (!allWindows.length) return;
+      const idx = Math.floor(Math.random() * allWindows.length);
+      const w = allWindows[idx];
+      // Hemen tersine çevir (on → off, off → on), sonra bir süre sonra geri
+      w.classList.toggle('on');
+      setTimeout(() => w.classList.toggle('on'), 300 + Math.random() * 700);
+    }, 200);
+
+    // Pencere sayısını resize ile güncelle
+    window.addEventListener('resize', () => {
+      // Yenileme yerine sayfayı yeniden yüklemek daha pratik
+      location.reload();
+    });
+  </script>
+</body>
+</html>
