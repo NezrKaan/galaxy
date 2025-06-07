@@ -1,38 +1,21 @@
 body {
     margin: 0;
-    overflow: hidden;
-    background-color: #0d001a; /* Koyu morumsu arka plan */
-    font-family: 'Electrolize', sans-serif; /* Fütüristik font (örnek) */
-    cursor: none; /* Varsayılan imleci gizle */
+    overflow: hidden; /* Kaydırma çubuklarını gizle */
+    background-color: #0c001a; /* Daha koyu, morumsu arka plan */
+    font-family: 'Electrolize', sans-serif; /* Fütüristik font */
+    cursor: default; /* Varsayılan imleci göster */
 }
-
 
 canvas {
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 1; /* Yıldızlar arkada */
 }
 
-#city {
-    z-index: 2; /* Şehir önde */
+#starsCanvas {
+    z-index: 1; /* Yıldızlar en arkada */
 }
 
-#cursor-light {
-    position: absolute;
-    width: 30px; /* İmleç boyutu */
-    height: 30px;
-    background: radial-gradient(circle, rgba(138, 84, 255, 0.8) 0%, rgba(138, 84, 255, 0) 70%); /* Morimsi ışık */
-    border-radius: 50%;
-    /* translate3d ile daha iyi performans */
-    transform: translate3d(-50%, -50%, 0); /* Tam ortalama */
-    pointer-events: none; /* İmlecin altındaki elementlere tıklamayı engelle */
-    transition: transform 0.1s ease-out, opacity 0.3s ease-out; /* Yumuşak geçişler */
-    z-index: 10; /* En önde */
-    opacity: 1;
-    box-shadow: 0 0 20px 5px rgba(138, 84, 255, 0.6); /* Hafif dış ışıma */
-}
-
-#cursor-light.active {
-    box-shadow: 0 0 30px 10px rgba(138, 84, 255, 0.8); /* Daha güçlü ışıma */
+#cityCanvas {
+    z-index: 2; /* Şehir ve gemiler yıldızların üzerinde */
 }
