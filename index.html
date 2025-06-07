@@ -4,10 +4,10 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 <title>Space Cowboy Terminal</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
 
-  /* Arka plan: koyu mor */
   body {
     margin: 0;
     min-height: 100vh;
@@ -23,7 +23,6 @@
     text-align: center;
   }
 
-  /* Başlık neon animasyonlu */
   h1 {
     font-size: 4rem;
     text-shadow:
@@ -37,7 +36,6 @@
     line-height: 1.1;
   }
 
-  /* Alt metin */
   p {
     font-size: 1.5rem;
     color: #b793f9;
@@ -46,7 +44,6 @@
     margin: 0 0 40px 0;
   }
 
-  /* Yıldızlar */
   .stars {
     position: fixed;
     width: 100%;
@@ -65,33 +62,40 @@
     animation: twinkle infinite;
   }
 
-  /* GIF kapsayıcı */
-  .gif-container {
+  .social-container {
     display: flex;
     gap: 40px;
     justify-content: center;
     flex-wrap: wrap;
-    max-width: 600px;
+    max-width: 300px;
     z-index: 1;
   }
 
-  .gif-container img {
-    width: 120px;
-    height: auto;
-    border-radius: 12px;
-    box-shadow:
-      0 0 15px #a46ee5,
-      0 0 40px #7c43ff;
-    transition: transform 0.3s ease;
-  }
-  .gif-container img:hover {
-    transform: scale(1.1) rotate(5deg);
-    box-shadow:
-      0 0 25px #d8b4fe,
-      0 0 60px #d8b4fe;
+  .social-container a {
+    color: #d8b4fe;
+    font-size: 3rem;
+    transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.3s ease;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  /* Animasyonlar */
+  .social-container a:hover {
+    color: #7c43ff;
+    text-shadow:
+      0 0 10px #7c43ff,
+      0 0 20px #d8b4fe;
+    transform: scale(1.2) rotate(10deg);
+  }
+
+  /* VSCO için SVG özel stili */
+  .vsco-icon {
+    width: 1em;
+    height: 1em;
+    fill: currentColor;
+  }
+
   @keyframes flicker {
     0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
       opacity: 1;
@@ -124,7 +128,6 @@
     50% {opacity: 0.3;}
   }
 
-  /* Responsive */
   @media (max-width: 600px) {
     h1 {
       font-size: 2.5rem;
@@ -133,9 +136,11 @@
       font-size: 1.2rem;
       margin-bottom: 30px;
     }
-    .gif-container img {
-      width: 90px;
-      margin-bottom: 20px;
+    .social-container {
+      gap: 30px;
+    }
+    .social-container a {
+      font-size: 2.4rem;
     }
   }
 </style>
@@ -145,15 +150,25 @@
   <h1>See you, space cowboy...</h1>
   <p>Welcome to the neon edge of cyberspace.</p>
 
-  <div class="gif-container">
-    <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjg0eWFscGF6OGF5Mm15dG54bGxnNGhzM3R3d2t2ZDNxYXp0enY5cSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ztpMY1t5VYWlO/giphy.gif" alt="Cyberpunk Neon" />
-    <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExNGhoems3NDd2OXl4MHY2Z2xxajFsbjNudXB5bmJlY3BoMHAwanF0MSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/11KzOet1ElBDz2/giphy.gif" alt="Space Animation" />
+  <div class="social-container">
+    <a href="https://linkedin.com/in/username" target="_blank" aria-label="LinkedIn">
+      <i class="fab fa-linkedin"></i>
+    </a>
+    <a href="https://instagram.com/username" target="_blank" aria-label="Instagram">
+      <i class="fab fa-instagram"></i>
+    </a>
+    <a href="https://vsco.co/username" target="_blank" aria-label="VSCO">
+      <svg class="vsco-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+        <circle cx="32" cy="32" r="30" stroke="currentColor" stroke-width="4" fill="none"/>
+        <circle cx="32" cy="32" r="20" stroke="currentColor" stroke-width="4" fill="none"/>
+        <circle cx="32" cy="32" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
+      </svg>
+    </a>
   </div>
 
   <div class="stars"></div>
 
   <script>
-    // Yıldız simülasyonu
     const starsContainer = document.querySelector('.stars');
     const starCount = 80;
 
