@@ -3,177 +3,172 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Cowboy Bebop Tarzı Mor Tema</title>
+<title>Cyberpunk Neon Şehir - Canlı Dijital Sanat</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
-
-  * {
-    margin: 0; padding: 0; box-sizing: border-box;
-  }
-  body {
-    background: #1a0033;
-    color: #f5e6cc;
+  body, html {
+    margin: 0; padding: 0; overflow: hidden; background: #1a0033;
     font-family: 'Orbitron', monospace;
-    overflow: hidden;
-    user-select: none;
   }
-  #city {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-    background: linear-gradient(180deg, #220044 0%, #000011 80%);
-    overflow: hidden;
-  }
-  .building {
-    position: absolute;
-    bottom: 0;
-    width: 60px;
-    height: 200px;
-    background: linear-gradient(180deg, #3a0066, #120022);
-    border: 2px solid #6e3ca0;
-    border-radius: 4px 4px 0 0;
-    cursor: pointer;
-    box-shadow: 0 0 10px #8a54ff88;
-    transition: transform 0.3s ease;
-  }
-  .building:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 0 20px #bb88ffcc;
-  }
-  .window {
-    width: 10px;
-    height: 14px;
-    background: #f5e6cc;
-    margin: 4px auto;
-    border-radius: 2px;
-    box-shadow: 0 0 4px #f5e6cc99;
-  }
-  .info-box {
+  #info {
     position: fixed;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(30, 0, 70, 0.85);
-    border: 1px solid #f5e6cc;
-    padding: 12px 20px;
+    top: 10px; left: 10px;
+    color: #f5e6cc;
+    z-index: 10;
+    background: rgba(30,0,70,0.6);
+    padding: 8px 15px;
     border-radius: 8px;
-    max-width: 320px;
-    font-size: 1rem;
-    text-align: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.4s ease;
+    user-select:none;
   }
-  .info-box.show {
-    opacity: 1;
-    pointer-events: auto;
-  }
-  /* Starry sky */
-  #stars {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none;
-    z-index: 0;
+  @media(max-width:600px){
+    #info {
+      font-size: 0.8rem;
+      padding: 6px 10px;
+    }
   }
 </style>
 </head>
 <body>
 
-<div id="city"></div>
-<div id="info" class="info-box"></div>
-<canvas id="stars"></canvas>
+<div id="info">Cyberpunk Neon Şehir — Fare veya Dokunmatik Hareketi ile Keşfet</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
 
 <script>
-  const city = document.getElementById('city');
-  const infoBox = document.getElementById('info');
+// --- Temel Setup ---
+const scene = new THREE.Scene();
 
-  // Binaları oluşturuyoruz
-  const buildingsData = [
-    { x: 50, height: 220, name: "Spacetime Tower", desc: "Gözlem kulesi, zamanın ötesinden bakar." },
-    { x: 150, height: 180, name: "Nebula Apartments", desc: "Mor dumanların arasında saklı yaşam alanları." },
-    { x: 250, height: 240, name: "Starship Hangar", desc: "Yıldız gemileri burada dinlenir." },
-    { x: 350, height: 200, name: "Synthwave Club", desc: "Geceyi mor ışıklarla renklendirir." },
-    { x: 450, height: 210, name: "Jazz Café", desc: "Dumanlı melodiler, uzun geceler." },
-  ];
+// Kamera
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 1, 1000);
+camera.position.set(0, 30, 50);
 
-  buildingsData.forEach(b => {
-    const bld = document.createElement('div');
-    bld.classList.add('building');
-    bld.style.left = b.x + 'px';
-    bld.style.height = b.height + 'px';
+// Renderer
+const renderer = new THREE.WebGLRenderer({antialias: true});
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0x1a0033);
+document.body.appendChild(renderer.domElement);
 
-    // Pencereler
-    const winCount = Math.floor(b.height / 30);
-    for(let i = 0; i < winCount; i++){
-      const win = document.createElement('div');
-      win.classList.add('window');
-      bld.appendChild(win);
-    }
+// Kontroller (Fare ile gezinti)
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.1;
+controls.minDistance = 20;
+controls.maxDistance = 100;
+controls.maxPolarAngle = Math.PI/2 - 0.05;
 
-    bld.addEventListener('click', () => {
-      showInfo(b.name, b.desc);
+// --- Neon Renk Paleti ---
+const neonColors = [0xff00ff, 0x8a54ff, 0xbb88ff, 0x661177, 0xdd55ff];
+
+// --- Zemin ---
+const groundGeo = new THREE.PlaneGeometry(100, 100);
+const groundMat = new THREE.MeshBasicMaterial({color: 0x220044});
+const ground = new THREE.Mesh(groundGeo, groundMat);
+ground.rotation.x = -Math.PI/2;
+scene.add(ground);
+
+// --- Basit Binalar ---
+const buildings = [];
+const buildingGeo = new THREE.BoxGeometry(4, 10, 4);
+
+for(let i = -10; i <= 10; i+=5){
+  for(let j = -10; j <= 10; j+=5){
+    const height = 5 + Math.random()*20;
+    const geo = new THREE.BoxGeometry(4, height, 4);
+    const colorIndex = Math.floor(Math.random()*neonColors.length);
+    const mat = new THREE.MeshStandardMaterial({
+      color: neonColors[colorIndex],
+      emissive: neonColors[colorIndex],
+      emissiveIntensity: 0.7,
+      roughness: 0.1,
+      metalness: 0.9,
     });
+    const building = new THREE.Mesh(geo, mat);
+    building.position.set(i, height/2, j);
+    scene.add(building);
+    buildings.push(building);
+  }
+}
 
-    city.appendChild(bld);
+// --- Neon Işıklar (PointLight) ---
+const neonLights = [];
+
+for(let i=0; i<10; i++){
+  const light = new THREE.PointLight(neonColors[i % neonColors.length], 1, 15);
+  light.position.set(
+    (Math.random()*20)-10,
+    5 + Math.random()*20,
+    (Math.random()*20)-10
+  );
+  scene.add(light);
+  neonLights.push(light);
+}
+
+// --- Sis Efekti ---
+const fogColor = new THREE.Color(0x1a0033);
+scene.fog = new THREE.FogExp2(fogColor, 0.035);
+
+// --- Atmosferik Partiküller (Toz veya yağmur efekti) ---
+const particleCount = 3000;
+const particlesGeo = new THREE.BufferGeometry();
+const positions = [];
+
+for(let i=0; i<particleCount; i++){
+  positions.push(
+    (Math.random()-0.5)*100,
+    Math.random()*50,
+    (Math.random()-0.5)*100
+  );
+}
+
+particlesGeo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+
+const particlesMat = new THREE.PointsMaterial({
+  color: 0xbb88ff,
+  size: 0.1,
+  transparent: true,
+  opacity: 0.2,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false
+});
+
+const particles = new THREE.Points(particlesGeo, particlesMat);
+scene.add(particles);
+
+// --- Animasyon Döngüsü ---
+function animate(time = 0){
+  requestAnimationFrame(animate);
+
+  // Binaları hafif yukarı aşağı titreştir
+  buildings.forEach((bld, i) => {
+    bld.position.y = (bld.geometry.parameters.height / 2) + Math.sin(time*0.001 + i) * 0.5;
   });
 
-  function showInfo(title, desc) {
-    infoBox.innerHTML = `<strong>${title}</strong><br>${desc}`;
-    infoBox.classList.add('show');
-    clearTimeout(window.infoTimeout);
-    window.infoTimeout = setTimeout(() => {
-      infoBox.classList.remove('show');
-    }, 5000);
-  }
-
-  // Yıldızlı gökyüzü animasyonu
-  const canvas = document.getElementById('stars');
-  const ctx = canvas.getContext('2d');
-  let width, height;
-  let stars = [];
-
-  function init() {
-    resize();
-    stars = [];
-    for(let i=0; i<150; i++) {
-      stars.push({
-        x: Math.random()*width,
-        y: Math.random()*height,
-        radius: Math.random()*1.2,
-        alpha: Math.random(),
-        delta: 0.005 + Math.random()*0.02
-      });
-    }
-    requestAnimationFrame(animate);
-  }
-
-  function resize() {
-    width = window.innerWidth;
-    height = window.innerHeight;
-    canvas.width = width;
-    canvas.height = height;
-  }
-
-  function animate() {
-    ctx.clearRect(0,0,width,height);
-    stars.forEach(s => {
-      s.alpha += s.delta;
-      if(s.alpha > 1 || s.alpha < 0) s.delta *= -1;
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.radius, 0, Math.PI*2);
-      ctx.fillStyle = `rgba(245, 230, 204, ${s.alpha})`;
-      ctx.fill();
-    });
-    requestAnimationFrame(animate);
-  }
-
-  window.addEventListener('resize', () => {
-    resize();
+  // Işıkları hafif hareket ettir
+  neonLights.forEach((light, i) => {
+    light.position.x += Math.sin(time*0.001 + i) * 0.01;
+    light.position.z += Math.cos(time*0.001 + i) * 0.01;
   });
 
-  init();
+  // Partikülleri aşağı doğru kaydır ve tekrar yukarı gönder (yağmur/yağmur benzeri)
+  const positions = particles.geometry.attributes.position.array;
+  for(let i=1; i<positions.length; i+=3){
+    positions[i] -= 0.05;
+    if(positions[i] < 0) positions[i] = 50;
+  }
+  particles.geometry.attributes.position.needsUpdate = true;
+
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+animate();
+
+// --- Responsive ---
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
 </script>
 
 </body>
