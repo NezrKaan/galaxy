@@ -1,137 +1,24 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>CSS Cyberpunk Şehir</title>
-    <link rel="stylesheet" href="./styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Electrolize&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cyberpunk Living City</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Electrolize&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="city-container">
-        </div>
+  <div class="city">
+    <div class="building" style="height: 70%;"></div>
+    <div class="building" style="height: 90%;"></div>
+    <div class="building" style="height: 80%;"></div>
+    <div class="building" style="height: 60%;"></div>
+    <div class="building" style="height: 75%;"></div>
+    <div class="building" style="height: 85%;"></div>
+  </div>
 
-    <script>
-        const cityContainer = document.getElementById('city-container');
-        const numBuildings = 30; // Oluşturulacak bina sayısı
-        const numShips = 8;     // Oluşturulacak gemi sayısı
+  <div class="cursor-light" id="cursor-light"></div>
 
-        // Rastgele bir tam sayı döndürür
-        function getRandomInt(min, max) {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
-        }
-
-        // Rastgele bir ondalıklı sayı döndürür
-        function getRandomFloat(min, max) {
-            return Math.random() * (max - min) + min;
-        }
-
-        // --- Binaları Oluştur ---
-        function createBuildings() {
-            cityContainer.innerHTML = ''; // Eski binaları temizle (resize durumunda)
-            const baseBuildingWidth = 100;
-            const baseBuildingHeight = window.innerHeight * 0.4;
-            let currentX = 0;
-
-            // Arka plan binaları (daha koyu, daha az detaylı görünen)
-            const numDepthLayers = 3; // 3 katman derinlik
-            for (let d = 0; d < numDepthLayers; d++) {
-                currentX = 0; // Her katman için sıfırla
-                while (currentX < window.innerWidth + baseBuildingWidth * 2) { // Ekran dışına taşacak kadar oluştur
-                    const buildingEl = document.createElement('div');
-                    buildingEl.classList.add('building');
-
-                    const width = getRandomFloat(baseBuildingWidth * 0.6, baseBuildingWidth * 1.5);
-                    const height = window.innerHeight * getRandomFloat(0.3 + d * 0.1, 0.7 + d * 0.05); // Katmana göre yükseklik varyasyonu
-
-                    const x = currentX + getRandomFloat(-width * 0.2, width * 0.2); // Hafif rastgele konum
-                    const hue = getRandomInt(0, 360); // Rastgele ana renk tonu
-
-                    buildingEl.style.width = `${width}px`;
-                    buildingEl.style.height = `${height}px`;
-                    buildingEl.style.left = `${x}px`;
-                    buildingEl.style.bottom = '0'; // Zemine hizala
-                    buildingEl.style.setProperty('--building-hue', hue);
-                    buildingEl.style.setProperty('--depth-factor', d); // CSS'te derinlik efekti için
-                    buildingEl.style.setProperty('--building-height', height); // CSS'te font boyutu vb için
-
-                    // Rastgele pencere gridi oluştur
-                    const numWindowRows = getRandomInt(5, Math.floor(height / 20));
-                    const numWindowCols = getRandomInt(3, Math.floor(width / 20));
-                    for (let r = 0; r < numWindowRows; r++) {
-                        for (let c = 0; c < numWindowCols; c++) {
-                            const windowEl = document.createElement('div');
-                            windowEl.classList.add('window');
-                            // CSS ile animasyon kontrolü
-                            windowEl.style.setProperty('--window-delay', `${getRandomFloat(0, 5)}s`); // Farklı gecikmeler
-                            windowEl.style.setProperty('--window-duration', `${getRandomFloat(0.5, 2)}s`); // Farklı animasyon süreleri
-                            windowEl.style.setProperty('--window-hue', `${getRandomInt(-20, 20)}`); // Pencere renk varyasyonu
-                            buildingEl.appendChild(windowEl);
-                        }
-                    }
-
-                    // Rastgele detaylar (anten, tabela)
-                    if (Math.random() < 0.5 && d === 0) { // Sadece öndeki binalarda detay
-                        const detailType = Math.random() < 0.6 ? 'antenna' : 'sign';
-                        const detailEl = document.createElement('div');
-                        detailEl.classList.add('building-detail', detailType);
-                        if (detailType === 'sign') {
-                            detailEl.textContent = ['NEON', 'CYBER', 'GLOW', 'TECH', 'ARCADE', 'DATA'][getRandomInt(0, 5)];
-                            detailEl.style.setProperty('--sign-hue', `${(hue + 180 + getRandomInt(-30, 30)) % 360}`);
-                        }
-                        buildingEl.appendChild(detailEl);
-                    }
-
-                    cityContainer.appendChild(buildingEl);
-                    currentX += width - getRandomFloat(10, 30); // Binaların üst üste binmesini sağla
-                }
-            }
-        }
-
-        // --- Gemileri Oluştur ---
-        function createShips() {
-            for (let i = 0; i < numShips; i++) {
-                const shipEl = document.createElement('div');
-                shipEl.classList.add('ship');
-
-                const startX = getRandomFloat(-window.innerWidth * 0.7, -100);
-                const startY = getRandomFloat(window.innerHeight * 0.1, window.innerHeight * 0.6);
-                const speed = getRandomFloat(5, 15); // CSS animation-duration ile ilişkili
-                const size = getRandomFloat(40, 90); // Gemi boyutu
-
-                shipEl.style.left = `${startX}px`;
-                shipEl.style.top = `${startY}px`;
-                shipEl.style.width = `${size}px`;
-                shipEl.style.height = `${size * getRandomFloat(0.5, 0.8)}px`; // Hafif orantı varyasyonu
-                shipEl.style.animationDuration = `${getRandomFloat(20, 40)}s`; // Animasyon süresi (hız)
-                shipEl.style.animationDelay = `-${getRandomFloat(0, 20)}s`; // Animasyon gecikmesi (farklı başlangıç pozisyonları)
-                shipEl.style.setProperty('--ship-hue', `${getRandomInt(0, 360)}`); // Gemi rengi
-                shipEl.style.setProperty('--ship-type', getRandomInt(0, 3)); // CSS ile farklı tipler
-                shipEl.style.setProperty('--vertical-amplitude', `${getRandomFloat(20, 50)}px`); // Dikey hareket genliği
-                shipEl.style.setProperty('--vertical-speed', `${getRandomFloat(5, 15)}s`); // Dikey hareket hızı
-
-                cityContainer.appendChild(shipEl);
-            }
-        }
-
-        // Sayfa yüklendiğinde ve boyut değiştiğinde her şeyi yeniden oluştur
-        window.addEventListener('load', () => {
-            createBuildings();
-            createShips();
-        });
-        window.addEventListener('resize', () => {
-            createBuildings(); // Binaları yeniden oluştur
-            // Gemileri de yeniden oluşturmak gerekir, aksi takdirde eski pozisyonlarında kalabilirler.
-            // Ancak bu, sayfayı her yeniden boyutlandırdığınızda mevcut gemilerin kaybolmasına neden olur.
-            // Eğer isterseniz, gemilerin konumunu JavaScript ile dinamik olarak ayarlayabiliriz.
-            // Şimdilik sadece yeniden oluşturma yeterli.
-            createShips();
-        });
-        
-        // İlk yüklemede çalıştır
-        createBuildings();
-        createShips();
-
-    </script>
+  <script src="main.js"></script>
 </body>
 </html>
