@@ -3,185 +3,117 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cyberpunk Şehir - Ana Sayfa</title>
+  <title>Cyberpunk Şehir - Detaylı Sahne</title>
+  <link rel="stylesheet" href="styles.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400&display=swap');
-
-    * { margin:0; padding:0; box-sizing:border-box; }
     body {
-      background: linear-gradient(180deg, #220044 0%, #000011 80%);
-      font-family: 'Orbitron', monospace;
+      /* Siyah %65, mor %35 degrade */
+      background: linear-gradient(180deg, #000011 0%, #000011 65%, #220044 100%);
       overflow: hidden;
-      position: relative;
       cursor: none;
     }
-
-    nav {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 10;
-      display: flex;
-      gap: 20px;
-    }
-    nav a {
-      color: #f5e6cc;
-      text-decoration: none;
-      padding: 8px 16px;
-      border: 1px solid #f5e6cc;
-      border-radius: 4px;
-      transition: background 0.3s, color 0.3s;
-    }
-    nav a:hover {
-      background: #f5e6cc;
-      color: #220044;
-    }
-
+    nav { /* Yönetim menüsü */ }
+    #stars, #cursor-light { /* index.html ile uyumlu */ }
     #city {
       position: relative;
       width: 100vw;
       height: 100vh;
       z-index: 1;
     }
-
     .building {
       position: absolute;
       bottom: 0;
-      width: 60px;
-      background: linear-gradient(180deg, #3a0066, #120022);
-      border: 2px solid #6e3ca0;
-      border-radius: 4px 4px 0 0;
-      box-shadow: 0 0 10px #8a54ff88;
-    }
-
-    .window {
-      width: 8px;
-      height: 12px;
-      margin: 3px auto;
-      border-radius: 2px;
-      background: #2a001f;
-      box-shadow: 0 0 2px #000;
-      transition: background 0.3s, box-shadow 0.3s;
-    }
-
-    .window.on {
-      background: #f5e6cc;
-      box-shadow: 0 0 4px #f5e6ccaa, 0 0 8px #bb88ff55;
-    }
-
-    #stars {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    #cursor-light {
-      position: fixed;
-      pointer-events: none;
       width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(187,136,255,0.7) 0%, transparent 70%);
-      mix-blend-mode: screen;
-      transform: translate(-50%, -50%);
-      z-index: 5;
-      transition: width 0.2s ease, height 0.2s ease;
+      background: linear-gradient(180deg, #2a002e, #0a0008);
+      border: 2px solid #7a3cff;
+      border-radius: 4px 4px 0 0;
+      box-shadow: 0 0 12px #bb88ff99;
     }
+    .window-row { display: flex; justify-content: space-around; margin-top: 6px; }
+    .window {
+      width: 10px;
+      height: 14px;
+      border-radius: 2px;
+      background: #150010;
+      box-shadow: 0 0 2px #000;
+      transition: background 0.5s, box-shadow 0.5s;
+    }
+    /* Farklı ışık renkleri */
+    .window.green { background: #a0ff8c; box-shadow: 0 0 6px #a0ff8c88; }
+    .window.blue { background: #8cdaff; box-shadow: 0 0 6px #8cdaff88; }
+    .window.pink { background: #ff8cda; box-shadow: 0 0 6px #ff8cda88; }
   </style>
 </head>
 <body>
-
   <nav>
     <a href="index.html">Ana Sayfa</a>
     <a href="city.html">Şehir</a>
     <a href="ships.html">Gemi</a>
   </nav>
-
-  <div id="city"></div>
   <canvas id="stars"></canvas>
   <div id="cursor-light"></div>
+  <div id="city"></div>
 
   <script>
-    // City setup (binalar)
+    // Ortak index.js'den yıldız ve imleç efektini çekebiliriz veya yeniden tanımlayalım
+    // Stars
+    const starCanvas = document.getElementById('stars');
+    const starCtx = starCanvas.getContext('2d');
+    let sw, sh, stars = [];
+    function initStars(){ sw = window.innerWidth; sh = window.innerHeight; starCanvas.width = sw; starCanvas.height = sh; stars = []; for(let i=0; i<200; i++){ stars.push({ x:Math.random()*sw, y:Math.random()*sh, r:Math.random()*1.5, a:Math.random(), d:0.003+Math.random()*0.02 }); } }
+    function drawStars(){ starCtx.clearRect(0,0,sw,sh); stars.forEach(s=>{ s.a+=s.d; if(s.a<=0||s.a>=1) s.d*=-1; starCtx.beginPath(); starCtx.arc(s.x,s.y,s.r,0,2*Math.PI); starCtx.fillStyle=`rgba(245,230,204,${s.a})`; starCtx.fill(); }); requestAnimationFrame(drawStars); }
+    initStars(); drawStars(); window.addEventListener('resize', initStars);
+    // Cursor
+    const cursor = document.getElementById('cursor-light');
+    function moveCursor(x,y){ cursor.style.left = x+'px'; cursor.style.top = y+'px'; }
+    window.addEventListener('mousemove',e=>moveCursor(e.clientX,e.clientY));
+    window.addEventListener('touchmove',e=>{ let t=e.touches[0]; moveCursor(t.clientX,t.clientY);} ,{passive:true});
+
+    // City buildings
     const city = document.getElementById('city');
-    const buildingCount = Math.ceil(window.innerWidth / 80);
-    for (let i = 0; i < buildingCount; i++) {
-      const b = document.createElement('div');
-      b.classList.add('building');
-      const x = i * 80 + Math.random() * 20 - 10;
-      const height = 100 + Math.random() * (window.innerHeight * 0.6);
-      b.style.left = x + 'px';
-      b.style.height = height + 'px';
-      const cols = 4;
-      const rows = Math.floor(height / 30);
-      for (let r = 0; r < rows; r++) {
-        const row = document.createElement('div');
-        row.style.display = 'flex';
-        row.style.justifyContent = 'space-around';
-        row.style.marginTop = '4px';
-        for (let c = 0; c < cols; c++) {
-          const w = document.createElement('div');
-          w.classList.add('window');
-          if (Math.random() < 0.3) w.classList.add('on');
+    const count = Math.ceil(window.innerWidth/100);
+    for(let i=0;i<count;i++){
+      // Bina element
+      const b = document.createElement('div'); b.classList.add('building');
+      const bx = i*100 + (Math.random()*40-20);
+      const bh = 120 + Math.random()*(window.innerHeight*0.5);
+      b.style.left=bx+'px'; b.style.height=bh+'px';
+      // Pencere satırları
+      const cols=5, rows=Math.floor(bh/30);
+      for(let r=0;r<rows;r++){
+        const row=document.createElement('div'); row.classList.add('window-row');
+        for(let c=0;c<cols;c++){
+          const w=document.createElement('div'); w.classList.add('window');
+          // Başlangıç durumu
+          const rand=Math.random();
+          if(rand<0.25) w.classList.add('green');
+          else if(rand<0.5) w.classList.add('blue');
+          else if(rand<0.75) w.classList.add('pink');
+          // 25% ihtimalle kapalı kalır (sınıf yok)
           row.appendChild(w);
         }
         b.appendChild(row);
       }
       city.appendChild(b);
     }
-    setInterval(() => {
-      const all = document.querySelectorAll('.window');
-      if (!all.length) return;
-      const idx = Math.floor(Math.random() * all.length);
-      const w = all[idx];
-      w.classList.toggle('on');
-      setTimeout(() => w.classList.toggle('on'), 300 + Math.random() * 700);
-    }, 200);
-
-    window.addEventListener('resize', () => location.reload());
-
-    // Stars animation
-    const canvas = document.getElementById('stars');
-    const ctx = canvas.getContext('2d');
-    let w, h, stars = [];
-    function initStars() {
-      w = window.innerWidth; h = window.innerHeight;
-      canvas.width = w; canvas.height = h;
-      stars = [];
-      for (let i = 0; i < 200; i++) {
-        stars.push({ x: Math.random() * w, y: Math.random() * h, r: Math.random() * 1.5, alpha: Math.random(), delta: 0.005 + Math.random() * 0.02 });
+    // Rastgele yanıp sönme
+    setInterval(()=>{
+      const windows = document.querySelectorAll('.building .window');
+      if(!windows.length) return;
+      const w = windows[Math.floor(Math.random()*windows.length)];
+      // Mevcut renkten toggle
+      if(w.classList.contains('green')||w.classList.contains('blue')||w.classList.contains('pink')){
+        // kapat
+        w.dataset.prev = w.classList.value;
+        w.className='window';
+      } else {
+        // rastgele renk ata
+        const choice=['green','blue','pink'][Math.floor(Math.random()*3)];
+        w.className=`window ${choice}`;
       }
-    }
-    function animateStars() {
-      ctx.clearRect(0, 0, w, h);
-      stars.forEach(s => {
-        s.alpha += s.delta;
-        if (s.alpha <= 0 || s.alpha >= 1) s.delta *= -1;
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(245,230,204,${s.alpha})`;
-        ctx.fill();
-      });
-      requestAnimationFrame(animateStars);
-    }
-    initStars(); animateStars();
-    window.addEventListener('resize', initStars);
+    },150);
 
-    // Cursor light
-    const cursor = document.getElementById('cursor-light');
-    function moveCursor(x, y) {
-      cursor.style.left = x + 'px';
-      cursor.style.top = y + 'px';
-    }
-    window.addEventListener('mousemove', e => moveCursor(e.clientX, e.clientY));
-    window.addEventListener('touchmove', e => {
-      const t = e.touches[0]; moveCursor(t.clientX, t.clientY);
-    }, { passive: true });
-
+    window.addEventListener('resize',()=>location.reload());
   </script>
 </body>
 </html>
