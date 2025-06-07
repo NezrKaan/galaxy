@@ -1,119 +1,128 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cyberpunk Şehir - Detaylı Sahne</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Cyberpunk Şehir - 3D İnteraktif Detaylı</title>
   <style>
-    body {
-      /* Siyah %65, mor %35 degrade */
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400&display=swap');
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body {
+      height:100%; overflow:hidden;
       background: linear-gradient(180deg, #000011 0%, #000011 65%, #220044 100%);
-      overflow: hidden;
-      cursor: none;
+      cursor:none; font-family:'Orbitron', monospace;
     }
-    nav { /* Yönetim menüsü */ }
-    #stars, #cursor-light { /* index.html ile uyumlu */ }
-    #city {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      z-index: 1;
+    #container {
+      position:relative; width:100vw; height:100vh;
     }
-    .building {
-      position: absolute;
-      bottom: 0;
-      width: 80px;
-      background: linear-gradient(180deg, #2a002e, #0a0008);
-      border: 2px solid #7a3cff;
-      border-radius: 4px 4px 0 0;
-      box-shadow: 0 0 12px #bb88ff99;
+    canvas#stars, canvas#city-canvas {
+      position:fixed; top:0; left:0;
+      width:100vw; height:100vh;
+      pointer-events:none; z-index:0;
     }
-    .window-row { display: flex; justify-content: space-around; margin-top: 6px; }
-    .window {
-      width: 10px;
-      height: 14px;
-      border-radius: 2px;
-      background: #150010;
-      box-shadow: 0 0 2px #000;
-      transition: background 0.5s, box-shadow 0.5s;
+    #cursor-light {
+      position:fixed; pointer-events:none;
+      width:60px; height:60px; border-radius:50%;
+      background:radial-gradient(circle, rgba(187,136,255,0.6) 0%, transparent 70%);
+      mix-blend-mode: screen; transform:translate(-50%,-50%);
+      z-index:2; transition:width 0.2s, height 0.2s;
     }
-    /* Farklı ışık renkleri */
-    .window.green { background: #a0ff8c; box-shadow: 0 0 6px #a0ff8c88; }
-    .window.blue { background: #8cdaff; box-shadow: 0 0 6px #8cdaff88; }
-    .window.pink { background: #ff8cda; box-shadow: 0 0 6px #ff8cda88; }
   </style>
 </head>
 <body>
-  <nav>
-    <a href="index.html">Ana Sayfa</a>
-    <a href="city.html">Şehir</a>
-    <a href="ships.html">Gemi</a>
-  </nav>
+  <div id="container"></div>
   <canvas id="stars"></canvas>
+  <canvas id="city-canvas"></canvas>
   <div id="cursor-light"></div>
-  <div id="city"></div>
 
   <script>
-    // Ortak index.js'den yıldız ve imleç efektini çekebiliriz veya yeniden tanımlayalım
-    // Stars
-    const starCanvas = document.getElementById('stars');
-    const starCtx = starCanvas.getContext('2d');
+    // --- Yıldızlar ---
+    const starCanvas = document.getElementById('stars'), sCtx = starCanvas.getContext('2d');
     let sw, sh, stars = [];
-    function initStars(){ sw = window.innerWidth; sh = window.innerHeight; starCanvas.width = sw; starCanvas.height = sh; stars = []; for(let i=0; i<200; i++){ stars.push({ x:Math.random()*sw, y:Math.random()*sh, r:Math.random()*1.5, a:Math.random(), d:0.003+Math.random()*0.02 }); } }
-    function drawStars(){ starCtx.clearRect(0,0,sw,sh); stars.forEach(s=>{ s.a+=s.d; if(s.a<=0||s.a>=1) s.d*=-1; starCtx.beginPath(); starCtx.arc(s.x,s.y,s.r,0,2*Math.PI); starCtx.fillStyle=`rgba(245,230,204,${s.a})`; starCtx.fill(); }); requestAnimationFrame(drawStars); }
-    initStars(); drawStars(); window.addEventListener('resize', initStars);
-    // Cursor
+    function resizeStars(){ sw=window.innerWidth; sh=window.innerHeight; starCanvas.width=sw; starCanvas.height=sh; stars=[];
+      for(let i=0;i<200;i++){ stars.push({ x:Math.random()*sw, y:Math.random()*sh, r:Math.random()*1.3, a:Math.random(), d:0.004+Math.random()*0.02 }); }
+    }
+    function drawStars(){ sCtx.clearRect(0,0,sw,sh);
+      stars.forEach(s=>{ s.a+=s.d; if(s.a<=0||s.a>=1) s.d*=-1;
+        sCtx.beginPath(); sCtx.arc(s.x,s.y,s.r,0,2*Math.PI);
+        sCtx.fillStyle=`rgba(245,230,204,${s.a})`; sCtx.fill(); });
+      requestAnimationFrame(drawStars);
+    }
+    resizeStars(); drawStars(); window.addEventListener('resize',resizeStars);
+
+    // --- İmleç ışığı ---
     const cursor = document.getElementById('cursor-light');
     function moveCursor(x,y){ cursor.style.left = x+'px'; cursor.style.top = y+'px'; }
-    window.addEventListener('mousemove',e=>moveCursor(e.clientX,e.clientY));
-    window.addEventListener('touchmove',e=>{ let t=e.touches[0]; moveCursor(t.clientX,t.clientY);} ,{passive:true});
+    window.addEventListener('mousemove', e=>moveCursor(e.clientX,e.clientY));
+    window.addEventListener('touchmove', e=>{ const t=e.touches[0]; moveCursor(t.clientX,t.clientY); },{passive:true});
 
-    // City buildings
-    const city = document.getElementById('city');
-    const count = Math.ceil(window.innerWidth/100);
-    for(let i=0;i<count;i++){
-      // Bina element
-      const b = document.createElement('div'); b.classList.add('building');
-      const bx = i*100 + (Math.random()*40-20);
-      const bh = 120 + Math.random()*(window.innerHeight*0.5);
-      b.style.left=bx+'px'; b.style.height=bh+'px';
-      // Pencere satırları
-      const cols=5, rows=Math.floor(bh/30);
-      for(let r=0;r<rows;r++){
-        const row=document.createElement('div'); row.classList.add('window-row');
-        for(let c=0;c<cols;c++){
-          const w=document.createElement('div'); w.classList.add('window');
-          // Başlangıç durumu
-          const rand=Math.random();
-          if(rand<0.25) w.classList.add('green');
-          else if(rand<0.5) w.classList.add('blue');
-          else if(rand<0.75) w.classList.add('pink');
-          // 25% ihtimalle kapalı kalır (sınıf yok)
-          row.appendChild(w);
+    // --- Şehir Canvas ---
+    const cityCanvas = document.getElementById('city-canvas'), cCtx = cityCanvas.getContext('2d');
+    function resizeCity(){ cityCanvas.width = sw; cityCanvas.height = sh; }
+    window.addEventListener('resize', resizeCity);
+    resizeCity();
+
+    // Binalar veri yapısı
+    class Building {
+      constructor(x, w, h){ this.x=x; this.w=w; this.h=h; this.rows=Math.floor(h/30); this.cols=5;
+        this.windows = [];
+        for(let r=0;r<this.rows;r++){
+          for(let c=0;c<this.cols;c++){
+            const px = x + c*(w/this.cols) + w/this.cols/2;
+            const py = sh - (r*30 + 15 + (sh - h));
+            const state = Math.random();
+            let color = null;
+            if(state<0.2) color='green';
+            else if(state<0.4) color='blue';
+            else if(state<0.6) color='pink';
+            // else null=off
+            this.windows.push({x:px, y:py, radius:5, color, alpha: color?1:0});
+          }
         }
-        b.appendChild(row);
       }
-      city.appendChild(b);
+      draw(ctx){
+        // Bina gövdesi
+        ctx.fillStyle='#220022'; ctx.strokeStyle='#7a3cff'; ctx.lineWidth=2;
+        ctx.fillRect(this.x, sh - this.h, this.w, this.h);
+        ctx.strokeRect(this.x, sh - this.h, this.w, this.h);
+        // Pencereler
+        this.windows.forEach(w=>{
+          if(w.color){
+            let col;
+            if(w.color==='green') col=`rgba(160,255,140,${w.alpha})`;
+            if(w.color==='blue') col=`rgba(140,218,255,${w.alpha})`;
+            if(w.color==='pink') col=`rgba(255,140,218,${w.alpha})`;
+            ctx.beginPath(); ctx.arc(w.x, w.y, w.radius,0,2*Math.PI);
+            ctx.fillStyle=col; ctx.shadowColor=col; ctx.shadowBlur=10; ctx.fill(); ctx.shadowBlur=0;
+          }
+        });
+      }
+      flicker(){
+        const idx=Math.floor(Math.random()*this.windows.length);
+        const w=this.windows[idx];
+        if(w.color){ w.alpha=0; setTimeout(()=>w.alpha=1,200+Math.random()*800);
+        } else { const colors=['green','blue','pink']; w.color=colors[Math.floor(Math.random()*3)]; w.alpha=1; setTimeout(()=>w.color=null,200+Math.random()*800);}  }
     }
-    // Rastgele yanıp sönme
-    setInterval(()=>{
-      const windows = document.querySelectorAll('.building .window');
-      if(!windows.length) return;
-      const w = windows[Math.floor(Math.random()*windows.length)];
-      // Mevcut renkten toggle
-      if(w.classList.contains('green')||w.classList.contains('blue')||w.classList.contains('pink')){
-        // kapat
-        w.dataset.prev = w.classList.value;
-        w.className='window';
-      } else {
-        // rastgele renk ata
-        const choice=['green','blue','pink'][Math.floor(Math.random()*3)];
-        w.className=`window ${choice}`;
-      }
-    },150);
 
-    window.addEventListener('resize',()=>location.reload());
+    // Generate buildings
+    let buildings = [];
+    function initBuildings(){ buildings=[];
+      const count = Math.ceil(sw/120);
+      for(let i=0;i<count;i++){
+        const w=80+Math.random()*40;
+        const h=100+Math.random()*(sh*0.6);
+        const x=i*(sw/count) + (Math.random()*20-10);
+        buildings.push(new Building(x,w,h));
+      }
+    }
+    function drawCity(){ cCtx.clearRect(0,0,sw,sh);
+      buildings.forEach(b=>b.draw(cCtx));
+      requestAnimationFrame(drawCity);
+    }
+    function startFlicker(){ setInterval(()=>{ const b=buildings[Math.floor(Math.random()*buildings.length)]; b.flicker();},150); }
+
+    initBuildings(); drawCity(); startFlicker();
+    window.addEventListener('resize', ()=>{ resizeStars(); resizeCity(); initBuildings(); });
   </script>
 </body>
 </html>
