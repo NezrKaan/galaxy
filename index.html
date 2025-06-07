@@ -379,25 +379,12 @@
             for (let i = 0; i < 7; i++) ships.push(new Ship());
         }
         function drawShips() {
-            // Her karede temizleme, gemilerin arkasında iz bırakmamak için önemli
-            // Ancak şehir canvas'ı (cityCanvas) üzerine çizildiği için,
-            // drawBuildings fonksiyonu zaten clearRect yapıyor.
-            // Bu nedenle burada tekrar clearRect yapmaya gerek yok.
-            // cCtx.clearRect(0, 0, w, h); // Zaten drawBuildings() tarafından yapılıyor
+            
 
             ships.forEach(s => { s.update(); s.draw(cCtx); });
             requestAnimationFrame(drawShips);
         }
-        // initShips() ve drawShips() resizeAll içinde zaten çağrılıyor.
-        // Ancak ilk yüklemede çağrılmalarını garanti altına alalım.
-
-        // Tüm animasyon döngülerini başlatma
-        // initStars(), initBuildings(), initShips() fonksiyonları
-        // resizeAll() içinde zaten çağrılıyor, bu da ilk yüklemede boyutlandırma
-        // ve başlangıç değerlerini ayarlıyor.
-        // drawStars(), drawBuildings(), drawShips() fonksiyonları
-        // kendi içlerinde requestAnimationFrame ile sürekli olarak tekrar çağrıldıkları için
-        // bir kez başlatılmaları yeterlidir.
+    
         drawStars();
         drawBuildings();
         drawShips();
