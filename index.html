@@ -1,144 +1,180 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Space Cowboy</title>
+<title>Cowboy Bebop Tarzı Mor Tema</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
 
+  * {
+    margin: 0; padding: 0; box-sizing: border-box;
+  }
   body {
-    margin: 0;
-    min-height: 100vh;
-    background: #1a002f;
-    color: #c18aff;
-    font-family: 'Orbitron', monospace, monospace;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 40px 20px;
-    overflow-x: hidden;
-  }
-
-  h1 {
-    font-size: 4rem;
-    color: #e09aff;
-    text-shadow:
-      0 0 10px #c18aff,
-      0 0 20px #a052ff,
-      0 0 40px #7b1fff;
-    margin: 0 0 10px 0;
-    letter-spacing: 0.15em;
+    background: #1a0033;
+    color: #f5e6cc;
+    font-family: 'Orbitron', monospace;
+    overflow: hidden;
     user-select: none;
   }
-
-  p.subtitle {
-    font-size: 1.5rem;
-    color: #b288f9;
-    text-shadow: 0 0 8px #b288f9;
-    margin: 0 0 40px 0;
-    user-select: none;
+  #city {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(180deg, #220044 0%, #000011 80%);
+    overflow: hidden;
   }
-
-  .cards {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 25px;
-    max-width: 900px;
-    justify-content: center;
+  .building {
+    position: absolute;
+    bottom: 0;
+    width: 60px;
+    height: 200px;
+    background: linear-gradient(180deg, #3a0066, #120022);
+    border: 2px solid #6e3ca0;
+    border-radius: 4px 4px 0 0;
+    cursor: pointer;
+    box-shadow: 0 0 10px #8a54ff88;
+    transition: transform 0.3s ease;
   }
-
-  .card {
-    background: #2d0055;
-    border: 2px solid #b288f9;
-    border-radius: 15px;
-    width: 260px;
-    height: 160px;
-    box-shadow:
-      0 0 8px #b288f9,
-      inset 0 0 10px #7b1fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #d0bfff;
-    font-size: 1.2rem;
+  .building:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 0 20px #bb88ffcc;
+  }
+  .window {
+    width: 10px;
+    height: 14px;
+    background: #f5e6cc;
+    margin: 4px auto;
+    border-radius: 2px;
+    box-shadow: 0 0 4px #f5e6cc99;
+  }
+  .info-box {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(30, 0, 70, 0.85);
+    border: 1px solid #f5e6cc;
+    padding: 12px 20px;
+    border-radius: 8px;
+    max-width: 320px;
+    font-size: 1rem;
     text-align: center;
-    cursor: default;
-    user-select: none;
-    transition: box-shadow 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
   }
-
-  .card:hover {
-    box-shadow:
-      0 0 20px #c18aff,
-      inset 0 0 25px #9c3fff,
-      0 0 40px #7b1fff;
+  .info-box.show {
+    opacity: 1;
+    pointer-events: auto;
   }
-
-  .social-links {
-    margin-top: 50px;
-    display: flex;
-    gap: 30px;
-  }
-
-  .social-links a {
-    color: #b288f9;
-    text-decoration: none;
-    font-size: 2rem;
-    transition: color 0.3s ease;
-  }
-
-  .social-links a:hover {
-    color: #e09aff;
-  }
-
-  footer {
-    margin-top: 60px;
-    font-size: 1.3rem;
-    color: #c18aff;
-    text-shadow: 0 0 8px #b288f9;
-    user-select: none;
-  }
-
-  /* Responsive */
-  @media (max-width: 600px) {
-    h1 {
-      font-size: 2.8rem;
-    }
-    p.subtitle {
-      font-size: 1.1rem;
-      margin-bottom: 30px;
-    }
-    .card {
-      width: 90vw;
-      max-width: 350px;
-      height: 140px;
-      font-size: 1rem;
-    }
+  /* Starry sky */
+  #stars {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 0;
   }
 </style>
-<!-- FontAwesome CDN for social icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 <body>
 
-  <h1>SPACE COWBOY</h1>
-  <p class="subtitle">Riding the neon waves of cyberspace...</p>
+<div id="city"></div>
+<div id="info" class="info-box"></div>
+<canvas id="stars"></canvas>
 
-  <div class="cards">
-    <div class="card">Project One - Coming Soon</div>
-    <div class="card">Project Two - In Progress</div>
-    <div class="card">Storyline - TBD</div>
-    <div class="card">More to Come...</div>
-  </div>
+<script>
+  const city = document.getElementById('city');
+  const infoBox = document.getElementById('info');
 
-  <div class="social-links">
-    <a href="https://linkedin.com/in/yourprofile" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
-    <a href="https://instagram.com/yourprofile" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-    <a href="https://vsco.co/yourprofile" target="_blank" aria-label="VSCO"><i class="fas fa-camera-retro"></i></a>
-  </div>
+  // Binaları oluşturuyoruz
+  const buildingsData = [
+    { x: 50, height: 220, name: "Spacetime Tower", desc: "Gözlem kulesi, zamanın ötesinden bakar." },
+    { x: 150, height: 180, name: "Nebula Apartments", desc: "Mor dumanların arasında saklı yaşam alanları." },
+    { x: 250, height: 240, name: "Starship Hangar", desc: "Yıldız gemileri burada dinlenir." },
+    { x: 350, height: 200, name: "Synthwave Club", desc: "Geceyi mor ışıklarla renklendirir." },
+    { x: 450, height: 210, name: "Jazz Café", desc: "Dumanlı melodiler, uzun geceler." },
+  ];
 
-  <footer>See you, space cowboy...</footer>
+  buildingsData.forEach(b => {
+    const bld = document.createElement('div');
+    bld.classList.add('building');
+    bld.style.left = b.x + 'px';
+    bld.style.height = b.height + 'px';
+
+    // Pencereler
+    const winCount = Math.floor(b.height / 30);
+    for(let i = 0; i < winCount; i++){
+      const win = document.createElement('div');
+      win.classList.add('window');
+      bld.appendChild(win);
+    }
+
+    bld.addEventListener('click', () => {
+      showInfo(b.name, b.desc);
+    });
+
+    city.appendChild(bld);
+  });
+
+  function showInfo(title, desc) {
+    infoBox.innerHTML = `<strong>${title}</strong><br>${desc}`;
+    infoBox.classList.add('show');
+    clearTimeout(window.infoTimeout);
+    window.infoTimeout = setTimeout(() => {
+      infoBox.classList.remove('show');
+    }, 5000);
+  }
+
+  // Yıldızlı gökyüzü animasyonu
+  const canvas = document.getElementById('stars');
+  const ctx = canvas.getContext('2d');
+  let width, height;
+  let stars = [];
+
+  function init() {
+    resize();
+    stars = [];
+    for(let i=0; i<150; i++) {
+      stars.push({
+        x: Math.random()*width,
+        y: Math.random()*height,
+        radius: Math.random()*1.2,
+        alpha: Math.random(),
+        delta: 0.005 + Math.random()*0.02
+      });
+    }
+    requestAnimationFrame(animate);
+  }
+
+  function resize() {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+  }
+
+  function animate() {
+    ctx.clearRect(0,0,width,height);
+    stars.forEach(s => {
+      s.alpha += s.delta;
+      if(s.alpha > 1 || s.alpha < 0) s.delta *= -1;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.radius, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(245, 230, 204, ${s.alpha})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(animate);
+  }
+
+  window.addEventListener('resize', () => {
+    resize();
+  });
+
+  init();
+</script>
 
 </body>
 </html>
