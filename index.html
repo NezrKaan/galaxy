@@ -1,178 +1,101 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cyberpunk Şehir - Ana Sayfa</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Cyberpunk Arka Plan</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400&display=swap');
-
     * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      /* Siyah'tan mora: 0-65% siyah, 65-100% mor */
-      background: linear-gradient(180deg, #000011 0%, #000011 65%, #220044 100%);
-      font-family: 'Orbitron', monospace;
+    html, body {
+      height: 100%;
       overflow: hidden;
-      position: relative;
-      cursor: none;
+      font-family: 'Orbitron', monospace;
     }
-
-    nav {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 10;
-      display: flex;
-      gap: 20px;
+    .container {
+      scroll-snap-type: y mandatory;
+      overflow-y: scroll;
+      height: 100%;
     }
-    nav a {
-      color: #f5e6cc;
-      text-decoration: none;
-      padding: 8px 16px;
-      border: 1px solid #f5e6cc;
-      border-radius: 4px;
-      transition: background 0.3s, color 0.3s;
-    }
-    nav a:hover {
-      background: #f5e6cc;
-      color: #220044;
-    }
-
-    #city {
+    section {
       position: relative;
       width: 100vw;
       height: 100vh;
-      z-index: 1;
+      scroll-snap-align: start;
     }
-
-    .building {
-      position: absolute;
-      bottom: 0;
-      width: 60px;
-      background: linear-gradient(180deg, #3a0066, #120022);
-      border: 2px solid #6e3ca0;
-      border-radius: 4px 4px 0 0;
-      box-shadow: 0 0 10px #8a54ff88;
+    /* Ortak degrade arka plan */
+    .bg-section {
+      background: linear-gradient(180deg, #000011 0%, #000011 65%, #220044 100%);
     }
-
-    .window {
-      width: 8px;
-      height: 12px;
-      margin: 3px auto;
-      border-radius: 2px;
-      background: #2a001f;
-      box-shadow: 0 0 2px #000;
-      transition: background 0.3s, box-shadow 0.3s;
-    }
-
-    .window.on {
-      background: #f5e6cc;
-      box-shadow: 0 0 4px #f5e6ccaa, 0 0 8px #bb88ff55;
-    }
-
-    #stars {
+    canvas {
       position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
+      top:0; left:0;
+      width:100vw; height:100vh;
       z-index: 0;
+      pointer-events: none;
     }
-
     #cursor-light {
       position: fixed;
-      pointer-events: none;
-      width: 80px;
-      height: 80px;
+      width: 60px; height: 60px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(187,136,255,0.7) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(187,136,255,0.6) 0%, transparent 70%);
       mix-blend-mode: screen;
       transform: translate(-50%, -50%);
-      z-index: 5;
+      z-index: 1;
+      pointer-events: none;
       transition: width 0.2s ease, height 0.2s ease;
     }
   </style>
 </head>
 <body>
-
-  <nav>
-    <a href="index.html">Ana Sayfa</a>
-    <a href="city.html">Şehir</a>
-    <a href="ships.html">Gemi</a>
-  </nav>
-
-  <div id="city"></div>
+  <div class="container">
+    <section class="bg-section" id="section1"></section>
+    <section class="bg-section" id="section2"></section>
+  </div>
   <canvas id="stars"></canvas>
   <div id="cursor-light"></div>
-
   <script>
-    // City setup (binalar)
-    const city = document.getElementById('city');
-    const buildingCount = Math.ceil(window.innerWidth / 80);
-    for (let i = 0; i < buildingCount; i++) {
-      const b = document.createElement('div');
-      b.classList.add('building');
-      const x = i * 80 + Math.random() * 20 - 10;
-      const height = 100 + Math.random() * (window.innerHeight * 0.6);
-      b.style.left = x + 'px';
-      b.style.height = height + 'px';
-      const cols = 4;
-      const rows = Math.floor(height / 30);
-      for (let r = 0; r < rows; r++) {
-        const row = document.createElement('div');
-        row.style.display = 'flex';
-        row.style.justifyContent = 'space-around';
-        row.style.marginTop = '4px';
-        for (let c = 0; c < cols; c++) {
-          const w = document.createElement('div');
-          w.classList.add('window');
-          if (Math.random() < 0.3) w.classList.add('on');
-          row.appendChild(w);
-        }
-        b.appendChild(row);
-      }
-      city.appendChild(b);
-    }
-    setInterval(() => {
-      const all = document.querySelectorAll('.window');
-      if (!all.length) return;
-      const idx = Math.floor(Math.random() * all.length);
-      const w = all[idx];
-      w.classList.toggle('on');
-      setTimeout(() => w.classList.toggle('on'), 300 + Math.random() * 700);
-    }, 200);
-
-    window.addEventListener('resize', () => location.reload());
-
-    // Stars animation
+    // Yıldız animasyonu
     const canvas = document.getElementById('stars');
     const ctx = canvas.getContext('2d');
     let w, h, stars = [];
+    function resize() {
+      w = window.innerWidth;
+      h = window.innerHeight;
+      canvas.width = w;
+      canvas.height = h;
+    }
     function initStars() {
-      w = window.innerWidth; h = window.innerHeight;
-      canvas.width = w; canvas.height = h;
       stars = [];
-      for (let i = 0; i < 200; i++) {
-        stars.push({ x: Math.random() * w, y: Math.random() * h, r: Math.random() * 1.5, alpha: Math.random(), delta: 0.005 + Math.random() * 0.02 });
+      for (let i = 0; i < 150; i++) {
+        stars.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          r: Math.random() * 1.5,
+          alpha: Math.random(),
+          delta: 0.005 + Math.random() * 0.015
+        });
       }
     }
-    function animateStars() {
+    function drawStars() {
       ctx.clearRect(0, 0, w, h);
       stars.forEach(s => {
         s.alpha += s.delta;
-        if (s.alpha <= 0 || s.alpha >= 1) s.delta *= -1;
+        if (s.alpha >= 1 || s.alpha <= 0) s.delta *= -1;
         ctx.beginPath();
         ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(245,230,204,${s.alpha})`;
         ctx.fill();
       });
-      requestAnimationFrame(animateStars);
+      requestAnimationFrame(drawStars);
     }
-    initStars(); animateStars();
-    window.addEventListener('resize', initStars);
+    window.addEventListener('resize', () => {
+      resize();
+      initStars();
+    });
+    resize(); initStars(); drawStars();
 
-    // Cursor light
+    // İmleç / dokunma takip
     const cursor = document.getElementById('cursor-light');
     function moveCursor(x, y) {
       cursor.style.left = x + 'px';
@@ -183,6 +106,14 @@
       const t = e.touches[0]; moveCursor(t.clientX, t.clientY);
     }, { passive: true });
 
+    // Mobilde scroll tetikleme için örnek: scroll'a göre opacity değişimi
+    const sec1 = document.getElementById('section1');
+    window.addEventListener('scroll', () => {
+      const sc = document.querySelector('.container').scrollTop;
+      const perc = sc / h;
+      // Birinci section opacity azalır, ikinci artar
+      sec1.style.opacity = 1 - Math.min(perc, 1);
+    });
   </script>
 </body>
 </html>
