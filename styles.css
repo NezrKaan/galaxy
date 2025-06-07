@@ -6,10 +6,6 @@ body {
     cursor: none; /* Varsayılan imleci gizle */
 }
 
-/* Google Fonts'tan fütüristik bir font için gerekli import */
-/* Bu @import kuralını genellikle doğrudan HTML'deki <link> ile yapmak daha iyidir,
-   ancak CSS içinde de çalışır. HTML'e eklediğimiz için bu satır gereksiz. */
-/* @import url('https://fonts.googleapis.com/css2?family=Electrolize&display=swap'); */
 
 canvas {
     position: absolute;
