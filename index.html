@@ -1,23 +1,199 @@
-<section>
-  <p>Glide To Reveal Secret Code</p>
-  <ul class="code">
-    <li tabindex="0" class="digit">
-      <span>0</span>
-    </li>
-    <li tabindex="0" class="digit">
-      <span>3</span>
-    </li>
-    <li tabindex="0" class="digit">
-      <span>4</span>
-    </li>
-    <li tabindex="0" class="digit">
-      <span>8</span>
-    </li>
-    <li tabindex="0" class="digit">
-      <span>7</span>
-    </li>
-    <li tabindex="0" class="digit">
-      <span>2</span>
-    </li>
-  </ul>
-</section>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic London Landscape</title>
+    <style>
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            height: 100vh;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Scene Container */
+        .scene {
+            position: relative;
+            height: 100vh;
+            transition: background 1.5s ease;
+        }
+
+        /* Celestial Bodies */
+        .celestial {
+            position: absolute;
+            border-radius: 50%;
+            transition: all 2s ease;
+        }
+
+        .sun {
+            width: 80px;
+            height: 80px;
+            background: #FFD700;
+            box-shadow: 0 0 40px #FFA500;
+        }
+
+        .moon {
+            width: 60px;
+            height: 60px;
+            background: #F0F0F0;
+            box-shadow: 0 0 30px #FFF;
+        }
+
+        /* Mountains */
+        .mountain {
+            position: absolute;
+            bottom: 0;
+            border-left: 150px solid transparent;
+            border-right: 150px solid transparent;
+            filter: brightness(var(--mountain-brightness));
+        }
+
+        .mountain-back {
+            border-bottom: 300px solid #4B6455;
+            z-index: 2;
+        }
+
+        .mountain-front {
+            border-bottom: 400px solid #3A5045;
+            z-index: 3;
+        }
+
+        /* Trees */
+        .tree {
+            position: absolute;
+            bottom: 0;
+            z-index: 4;
+        }
+
+        .tree::before {
+            content: '';
+            position: absolute;
+            border-left: 25px solid transparent;
+            border-right: 25px solid transparent;
+            border-bottom: 80px solid #2D5A3D;
+        }
+
+        .tree::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: -10px;
+            width: 20px;
+            height: 50px;
+            background: #4A312F;
+        }
+
+        /* Stars */
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 1.5s infinite alternate;
+        }
+
+        /* Animations */
+        @keyframes twinkle {
+            from { opacity: 0.3; }
+            to { opacity: 1; }
+        }
+
+        @keyframes shoot {
+            from { transform: translateX(-100vw) translateY(-50vh); }
+            to { transform: translateX(100vw) translateY(50vh); }
+        }
+
+        /* Time-based Themes */
+        .day {
+            background: linear-gradient(to bottom, #87CEEB 60%, #F0E68C);
+            --mountain-brightness: 1;
+        }
+
+        .sunset {
+            background: linear-gradient(to bottom, #FF6B6B 40%, #4B0082);
+            --mountain-brightness: 0.8;
+        }
+
+        .night {
+            background: linear-gradient(to bottom, #000428 60%, #000);
+            --mountain-brightness: 0.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="scene">
+        <div class="celestial"></div>
+        <div class="stars-container"></div>
+        <!-- Mountains -->
+        <div class="mountain mountain-back" style="left: 10%"></div>
+        <div class="mountain mountain-front" style="left: 30%"></div>
+        <div class="mountain mountain-back" style="left: 50%"></div>
+        <!-- Trees -->
+        <div class="tree" style="left: 15%"></div>
+        <div class="tree" style="left: 35%"></div>
+        <div class="tree" style="left: 70%"></div>
+    </div>
+
+    <script>
+        function getLondonHour() {
+            return new Date().toLocaleString('en-GB', {
+                timeZone: 'Europe/London',
+                hour: 'numeric',
+                hour12: false
+            });
+        }
+
+        function updateScene() {
+            const scene = document.querySelector('.scene');
+            const celestial = document.querySelector('.celestial');
+            const hour = parseInt(getLondonHour());
+            
+            // Clear existing elements
+            document.querySelectorAll('.star').forEach(star => star.remove());
+
+            // Set time-based classes
+            scene.className = 'scene';
+            if(hour >= 6 && hour < 18) {
+                scene.classList.add('day');
+                celestial.className = 'celestial sun';
+                celestial.style.left = `${((hour - 6) / 12) * 100}%`;
+                celestial.style.bottom = '30%';
+            } 
+            else if(hour >= 18 && hour < 20) {
+                scene.classList.add('sunset');
+                celestial.className = 'celestial sun';
+                celestial.style.left = `${90 + ((hour - 18) * 5)}%`;
+                celestial.style.bottom = `${20 - ((hour - 18) * 10)}%`;
+            }
+            else {
+                scene.classList.add('night');
+                celestial.className = 'celestial moon';
+                celestial.style.left = `${Math.random() * 80 + 10}%`;
+                celestial.style.top = '20%';
+                
+                // Create stars
+                for(let i = 0; i < 200; i++) {
+                    const star = document.createElement('div');
+                    star.className = 'star';
+                    star.style.width = `${Math.random() * 3}px`;
+                    star.style.height = star.style.width;
+                    star.style.left = `${Math.random() * 100}%`;
+                    star.style.top = `${Math.random() * 50}%`;
+                    star.style.animationDelay = `${Math.random() * 2}s`;
+                    document.querySelector('.stars-container').appendChild(star);
+                }
+            }
+        }
+
+        // Initial setup
+        updateScene();
+        setInterval(updateScene, 60000); // Update every minute
+    </script>
+</body>
+</html>
