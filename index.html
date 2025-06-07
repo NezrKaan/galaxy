@@ -1,226 +1,395 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Cyberpunk Yaşayan Şehir</title>
-  <!-- CSS en son ekleyeceğiz -->
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Cyberpunk Yaşayan Şehir</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- Yıldızlar için canvas -->
-  <canvas id="stars"></canvas>
-  <!-- Şehir ve gemiler için canvas -->
-  <canvas id="city"></canvas>
-  <!-- İmleç ışığı -->
-  <div id="cursor-light"></div>
+    <canvas id="stars"></canvas>
+    <canvas id="city"></canvas>
+    <div id="cursor-light"></div>
 
-  <script>
-    // --- Boyut ve resize ---
-    let w = window.innerWidth, h = window.innerHeight;
-    const starsCanvas = document.getElementById('stars'), sCtx = starsCanvas.getContext('2d');
-    const cityCanvas  = document.getElementById('city'),  cCtx = cityCanvas.getContext('2d');
-    const cursor      = document.getElementById('cursor-light');
+    <script>
+        // Canvas ve Context'ler
+        let w = window.innerWidth, h = window.innerHeight;
+        const starsCanvas = document.getElementById('stars');
+        const sCtx = starsCanvas.getContext('2d');
+        const cityCanvas = document.getElementById('city');
+        const cCtx = cityCanvas.getContext('2d');
+        const cursor = document.getElementById('cursor-light');
 
-    function resizeAll() {
-      w = window.innerWidth; h = window.innerHeight;
-      starsCanvas.width = cityCanvas.width = w;
-      starsCanvas.height = cityCanvas.height = h;
-      initStars(); initBuildings(); initShips();
-    }
-    window.addEventListener('resize', resizeAll);
-    resizeAll();
-
-    // --- İmleç takip (easing + pulse) ---
-    let targetX = w/2, targetY = h/2;
-    let currentX = targetX, currentY = targetY;
-    const ease = 0.15;
-
-    function onPointerMove(x, y) {
-      targetX = x; targetY = y;
-      cursor.classList.add('active');
-      clearTimeout(cursor._pulseTimeout);
-      cursor._pulseTimeout = setTimeout(() => {
-        cursor.classList.remove('active');
-      }, 200);
-    }
-
-    window.addEventListener('mousemove', e => onPointerMove(e.clientX, e.clientY));
-    window.addEventListener('touchmove', e => {
-      const t = e.touches[0]; onPointerMove(t.clientX, t.clientY);
-    }, { passive: true });
-
-    function animateCursor() {
-      const dx = targetX - currentX;
-      const dy = targetY - currentY;
-      currentX += dx * ease;
-      currentY += dy * ease;
-      const scale = cursor.classList.contains('active') ? 1.8 : 1;
-      cursor.style.transform = `translate(${currentX}px, ${currentY}px) scale(${scale})`;
-      requestAnimationFrame(animateCursor);
-    }
-    animateCursor();
-
-    window.addEventListener('mouseout', () => { cursor.style.opacity = 0; });
-    window.addEventListener('mouseover', () => { cursor.style.opacity = 1; });
-
-    // --- Stars (aynı önceki) ---
-    let stars = [];
-    function initStars() {
-      stars = [];
-      for (let i = 0; i < 150; i++) {
-        stars.push({ x: Math.random()*w, y: Math.random()*h, r: Math.random()*1.5, a: Math.random(), d: 0.004 + Math.random()*0.02 });
-      }
-    }
-    function drawStars() {
-      sCtx.clearRect(0, 0, w, h);
-      stars.forEach(s => {
-        s.a += s.d; if (s.a <= 0 || s.a >= 1) s.d *= -1;
-        sCtx.beginPath(); sCtx.arc(s.x, s.y, s.r, 0, 2*Math.PI);
-        sCtx.fillStyle = `rgba(245,230,204,${s.a})`;
-        sCtx.fill();
-      });
-      requestAnimationFrame(drawStars);
-    }
-    drawStars();
-
-   // --- Buildings (Geliştirilmiş) ---
-class Building {
-  constructor(x, width, height) {
-    this.x = x;
-    this.width = width;
-    this.height = height;
-    this.windows = [];
-
-    // Pencere ızgarası: kolon ve satır sayısı
-    const cols = Math.max(3, Math.floor(width / 20));
-    const rows = Math.max(4, Math.floor(height / 30));
-
-    // Pencere pozisyonlarını ve başlangıç durumlarını hesapla
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const px = x + (c + 0.5) * (width / cols);
-        const py = h - (r + 0.5) * (height / rows) - 10;
-        // Başlangıçta %25 ihtimalle açık sarı ışık
-        const isOn = Math.random() < 0.25;
-        this.windows.push({ x: px, y: py, r: 5, alpha: isOn ? 1 : 0 });
-      }
-    }
-  }
-
-  draw(ctx) {
-    // Bina gövdesi
-    ctx.fillStyle   = 'rgba(34,0,34,0.9)';
-    ctx.strokeStyle = '#8a54ff';
-    ctx.lineWidth   = 2;
-    ctx.fillRect(this.x, h - this.height, this.width, this.height);
-    ctx.strokeRect(this.x, h - this.height, this.width, this.height);
-
-    // Pencereler
-    this.windows.forEach(win => {
-      if (win.alpha <= 0) return;
-      const glow = `rgba(255,217,0,${win.alpha})`;
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(win.x, win.y, win.r, 0, Math.PI * 2);
-      ctx.fillStyle = glow;
-      ctx.shadowColor = glow;
-      ctx.shadowBlur = 12;
-      ctx.fill();
-      ctx.restore();
-    });
-  }
-
-  flicker() {
-    // Rastgele bir pencerenin ışığını toggle et
-    const idx = Math.floor(Math.random() * this.windows.length);
-    const w = this.windows[idx];
-    w.alpha = w.alpha > 0 ? 0 : 1;
-  }
-}
-
-let buildings = [];
-
-function initBuildings() {
-  buildings = [];
-  const count = Math.ceil(w / 120);
-  for (let i = 0; i < count; i++) {
-    const bw = 60 + Math.random() * 80;
-    const bh = 100 + Math.random() * (h * 0.5);
-    const bx = i * (w / count) + (Math.random() * 40 - 20);
-    buildings.push(new Building(bx, bw, bh));
-  }
-}
-
-function drawBuildings() {
-  cCtx.clearRect(0, 0, w, h);
-  buildings.forEach(b => b.draw(cCtx));
-  requestAnimationFrame(drawBuildings);
-}
-
-// Işık titremesi
-setInterval(() => {
-  if (buildings.length) {
-    buildings[Math.floor(Math.random() * buildings.length)].flicker();
-  }
-}, 200);
-
-// Başlat
-initBuildings();
-drawBuildings();
-
-
-    // --- Ships ---
-    class Ship {
-      constructor() {
-        this.reset();
-      }
-      reset() {
-        this.x = -50;
-        this.y = Math.random()*h*0.5 + 50;
-        this.vx = 2 + Math.random()*3;
-        this.color = ['cyan','magenta','yellow','white'][Math.floor(Math.random()*4)];
-        this.size  = 20 + Math.random()*30;
-        this.type  = Math.floor(Math.random()*3);
-      }
-      update() {
-        this.x += this.vx;
-        if (this.x > w + 50) this.reset();
-      }
-      draw(ctx) {
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.fillStyle = this.color;
-        ctx.globalAlpha = 0.8;
-        if (this.type === 0) {
-          ctx.beginPath();
-          ctx.arc(0,0,this.size*0.6,0,2*Math.PI);
-          ctx.fill();
-        } else if (this.type === 1) {
-          ctx.beginPath();
-          ctx.moveTo(-this.size, this.size/2);
-          ctx.lineTo( this.size, 0);
-          ctx.lineTo(-this.size,-this.size/2);
-          ctx.closePath();
-          ctx.fill();
-        } else {
-          ctx.fillRect(-this.size*0.5, -this.size*0.3, this.size, this.size*0.6);
+        // Boyutlandırma ve Yeniden Boyutlandırma
+        function resizeAll() {
+            w = window.innerWidth;
+            h = window.innerHeight;
+            starsCanvas.width = cityCanvas.width = w;
+            starsCanvas.height = cityCanvas.height = h;
+            initStars();
+            initBuildings(); // Binaları da yeniden oluştur
+            initShips();     // Gemileri de yeniden oluştur
         }
-        ctx.restore();
-      }
-    }
 
-    let ships = [];
-    function initShips() {
-      ships = [];
-      for (let i = 0; i < 5; i++) ships.push(new Ship());
-    }
-    function drawShips() {
-      ships.forEach(s => { s.update(); s.draw(cCtx); });
-      requestAnimationFrame(drawShips);
-    }
-    initShips(); drawShips();
+        window.addEventListener('resize', resizeAll);
+        resizeAll(); // Sayfa yüklendiğinde ilk boyutlandırma
 
-  </script>
+        // --- İmleç Takip (Easing ve Darbe Efekti) ---
+        let targetX = w / 2, targetY = h / 2;
+        let currentX = targetX, currentY = targetY;
+        const ease = 0.15; // Yumuşatma faktörü
+
+        function onPointerMove(x, y) {
+            targetX = x;
+            targetY = y;
+            cursor.classList.add('active');
+            clearTimeout(cursor._pulseTimeout);
+            cursor._pulseTimeout = setTimeout(() => {
+                cursor.classList.remove('active');
+            }, 200); // 200ms sonra 'active' sınıfını kaldır
+        }
+
+        window.addEventListener('mousemove', e => onPointerMove(e.clientX, e.clientY));
+        window.addEventListener('touchmove', e => {
+            const t = e.touches[0];
+            onPointerMove(t.clientX, t.clientY);
+        }, { passive: true }); // Dokunmatik olaylarda pasif dinleyici
+
+        function animateCursor() {
+            const dx = targetX - currentX;
+            const dy = targetY - currentY;
+            currentX += dx * ease;
+            currentY += dy * ease;
+
+            // İmleç aktifse ölçek büyüt
+            const scale = cursor.classList.contains('active') ? 1.8 : 1;
+            cursor.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) scale(${scale})`;
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        window.addEventListener('mouseout', () => { cursor.style.opacity = 0; });
+        window.addEventListener('mouseover', () => { cursor.style.opacity = 1; });
+
+        // --- Yıldızlar ---
+        let stars = [];
+        function initStars() {
+            stars = [];
+            for (let i = 0; i < 200; i++) { // Daha fazla yıldız
+                stars.push({
+                    x: Math.random() * w,
+                    y: Math.random() * h,
+                    r: Math.random() * 1.8, // Daha çeşitli boyutlar
+                    a: Math.random(), // Başlangıç opaklığı
+                    d: (Math.random() * 0.01 + 0.002) * (Math.random() > 0.5 ? 1 : -1) // Daha dinamik parlama hızı
+                });
+            }
+        }
+
+        function drawStars() {
+            sCtx.clearRect(0, 0, w, h);
+            stars.forEach(s => {
+                s.a += s.d;
+                if (s.a <= 0.1 || s.a >= 0.9) s.d *= -1; // Yıldızların hafifçe parlayıp sönmesi
+                sCtx.beginPath();
+                sCtx.arc(s.x, s.y, s.r, 0, 2 * Math.PI);
+                sCtx.fillStyle = `rgba(245,230,204,${s.a})`; // Hafif sarımsı beyaz yıldızlar
+                sCtx.fill();
+            });
+            requestAnimationFrame(drawStars);
+        }
+        initStars();
+        drawStars();
+
+        // --- Binalar (Geliştirilmiş ve Gerçekçi) ---
+        class Building {
+            constructor(x, width, height, baseHue) {
+                this.x = x;
+                this.width = width;
+                this.height = height;
+                this.windows = [];
+                this.baseHue = baseHue; // Her bina için farklı bir ana renk tonu
+                this.details = []; // Bina detayları (antenler, tabelalar vb.)
+
+                // Pencere ızgarası: kolon ve satır sayısı
+                const cols = Math.max(4, Math.floor(width / 15)); // Daha yoğun pencereler
+                const rows = Math.max(6, Math.floor(height / 20));
+
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < cols; c++) {
+                        const winWidth = width / cols * 0.6; // Pencere boyutu
+                        const winHeight = height / rows * 0.7;
+                        const px = this.x + (c * (width / cols)) + (width / cols - winWidth) / 2;
+                        const py = h - this.height + (r * (height / rows)) + (height / rows - winHeight) / 2;
+
+                        const isOn = Math.random() < 0.35; // Daha fazla pencere açık
+                        this.windows.push({
+                            x: px, y: py, width: winWidth, height: winHeight,
+                            alpha: isOn ? (0.7 + Math.random() * 0.3) : 0, // Parlaklık değişimi
+                            color: `hsl(${this.baseHue + (Math.random() * 30 - 15)}, 100%, 70%)`, // Işık renkleri
+                            flickerRate: 0.05 + Math.random() * 0.1 // Daha hızlı titreşim
+                        });
+                    }
+                }
+                this.generateDetails();
+            }
+
+            generateDetails() {
+                // Rastgele antenler veya çatı detayları
+                if (Math.random() < 0.6) { // %60 ihtimalle anten
+                    this.details.push({
+                        type: 'antenna',
+                        x: this.x + this.width / 2,
+                        y: h - this.height - (10 + Math.random() * 30),
+                        length: 20 + Math.random() * 50,
+                        color: `hsl(${this.baseHue}, 50%, 40%)`
+                    });
+                }
+                if (Math.random() < 0.4) { // %40 ihtimalle neon tabela
+                    this.details.push({
+                        type: 'sign',
+                        x: this.x + this.width / 2 + (Math.random() * this.width / 4 - this.width / 8),
+                        y: h - this.height + (Math.random() * this.height * 0.4),
+                        text: ['NEON', 'CYBER', 'GLOW', 'TECH'][Math.floor(Math.random() * 4)],
+                        color: `hsl(${(this.baseHue + 180) % 360}, 100%, 60%)` // Zıt renk
+                    });
+                }
+            }
+
+            draw(ctx) {
+                // Bina gövdesi
+                const gradient = ctx.createLinearGradient(this.x, h - this.height, this.x, h);
+                gradient.addColorStop(0, `hsla(${this.baseHue}, 50%, 15%, 0.95)`); // Koyu üst kısım
+                gradient.addColorStop(1, `hsla(${this.baseHue}, 60%, 5%, 0.98)`);  // Daha koyu alt kısım
+                ctx.fillStyle = gradient;
+                ctx.strokeStyle = `hsl(${this.baseHue}, 70%, 40%)`; // Kontur
+                ctx.lineWidth = 1.5;
+                ctx.fillRect(this.x, h - this.height, this.width, this.height);
+                ctx.strokeRect(this.x, h - this.height, this.width, this.height);
+
+                // Pencereler
+                this.windows.forEach(win => {
+                    if (win.alpha <= 0.05) return; // Çok sönükse çizme
+
+                    // Pencere arka planı (hafif karanlık)
+                    ctx.fillStyle = `rgba(10, 0, 10, 0.2)`;
+                    ctx.fillRect(win.x, win.y, win.width, win.height);
+
+                    const glowColor = win.color;
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.rect(win.x, win.y, win.width, win.height);
+                    ctx.fillStyle = `hsla(${win.color.match(/\d+/)[0]}, 100%, 70%, ${win.alpha})`;
+                    ctx.shadowColor = glowColor;
+                    ctx.shadowBlur = 8 + win.alpha * 5; // Parlaklığa göre daha fazla blur
+                    ctx.fill();
+                    ctx.restore();
+                });
+
+                // Detaylar
+                this.details.forEach(detail => {
+                    if (detail.type === 'antenna') {
+                        ctx.beginPath();
+                        ctx.moveTo(detail.x, h - this.height);
+                        ctx.lineTo(detail.x, detail.y);
+                        ctx.lineWidth = 2;
+                        ctx.strokeStyle = detail.color;
+                        ctx.stroke();
+                        ctx.beginPath();
+                        ctx.arc(detail.x, detail.y, 3, 0, Math.PI * 2);
+                        ctx.fillStyle = 'red';
+                        ctx.shadowColor = 'red';
+                        ctx.shadowBlur = 5;
+                        ctx.fill();
+                        ctx.shadowBlur = 0; // Gölgeyi sıfırla
+                    } else if (detail.type === 'sign') {
+                        ctx.save();
+                        ctx.font = `${Math.min(20, detail.width * 0.8)}px 'Electrolize', sans-serif`; // Daha dinamik font boyutu
+                        ctx.textAlign = 'center';
+                        ctx.fillStyle = detail.color;
+                        ctx.shadowColor = detail.color;
+                        ctx.shadowBlur = 15;
+                        ctx.fillText(detail.text, detail.x, detail.y);
+                        ctx.restore();
+                    }
+                });
+            }
+
+            flicker() {
+                // Rastgele bir pencerenin ışığını toggle et ve parlaklığını değiştir
+                const idx = Math.floor(Math.random() * this.windows.length);
+                const w = this.windows[idx];
+                w.alpha = w.alpha > 0.1 ? 0 : (0.7 + Math.random() * 0.3); // Kapanma veya rastgele parlaklık
+            }
+
+            updateWindows() {
+                // Pencerelerin sürekli titreşim efekti
+                this.windows.forEach(w => {
+                    if (Math.random() < w.flickerRate) { // Her pencere kendi titreşim hızına göre
+                        w.alpha = w.alpha > 0.1 ? 0 : (0.7 + Math.random() * 0.3);
+                    }
+                });
+            }
+        }
+
+        let buildings = [];
+
+        function initBuildings() {
+            buildings = [];
+            const minBuildingWidth = 80;
+            const maxBuildingWidth = 150;
+            let currentX = 0;
+
+            while (currentX < w) {
+                const bw = minBuildingWidth + Math.random() * (maxBuildingWidth - minBuildingWidth);
+                const bh = h * (0.3 + Math.random() * 0.5); // Ekran yüksekliğinin %30-80'i
+                const bx = currentX + (Math.random() * 30 - 15); // Hafif rastgele konum
+                const baseHue = Math.floor(Math.random() * 360); // Rastgele ana renk tonu
+                buildings.push(new Building(bx, bw, bh, baseHue));
+                currentX += bw - 20; // Binalar hafifçe üst üste binebilir
+            }
+            // Binaları yüksekliğe göre sırala ki öndekiler arkadakileri kapatsın
+            buildings.sort((a, b) => a.height - b.height);
+        }
+
+        function drawBuildings() {
+            cCtx.clearRect(0, 0, w, h);
+            buildings.forEach(b => {
+                b.draw(cCtx);
+                b.updateWindows(); // Pencereleri sürekli güncelle
+            });
+            requestAnimationFrame(drawBuildings);
+        }
+
+        // Başlat
+        initBuildings();
+        drawBuildings();
+
+        // --- Gemiler (Daha çeşitli ve detaylı) ---
+        class Ship {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = -Math.random() * w * 0.5 - 100; // Ekran dışından başla
+                this.y = h * (0.1 + Math.random() * 0.4); // Yüksekte uçuş alanı
+                this.vx = 1.5 + Math.random() * 2.5; // Daha gerçekçi hızlar
+                this.vy = (Math.random() * 0.5 - 0.25); // Hafif dikey hareket
+                this.size = 25 + Math.random() * 40; // Daha büyük ve çeşitli boyutlar
+                this.color = `hsl(${Math.random() * 360}, 100%, 70%)`; // Dinamik renkler
+                this.type = Math.floor(Math.random() * 4); // 4 farklı gemi tipi
+                this.hasTrail = Math.random() < 0.7; // Işık izi bırakma ihtimali
+                this.trailPoints = [];
+                this.lightPulse = Math.random() * Math.PI * 2; // Işık atışı için başlangıç fazı
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Hafif dalgalanma efekti
+                this.y += Math.sin(this.x * 0.02) * 0.5;
+
+                // Ekran dışına çıkınca sıfırla
+                if (this.x > w + this.size + 100) this.reset();
+
+                // Işık izi
+                if (this.hasTrail) {
+                    this.trailPoints.push({ x: this.x, y: this.y, alpha: 1 });
+                    if (this.trailPoints.length > 30) { // İz uzunluğu
+                        this.trailPoints.shift();
+                    }
+                    this.trailPoints.forEach(p => p.alpha *= 0.95); // Yavaşça sol
+                }
+
+                // Işık atışı animasyonu
+                this.lightPulse += 0.1;
+            }
+            draw(ctx) {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+
+                // Işık izi çizimi
+                if (this.hasTrail && this.trailPoints.length > 1) {
+                    ctx.beginPath();
+                    ctx.moveTo(this.trailPoints[0].x - this.x, this.trailPoints[0].y - this.y);
+                    for (let i = 1; i < this.trailPoints.length; i++) {
+                        ctx.lineTo(this.trailPoints[i].x - this.x, this.trailPoints[i].y - this.y);
+                    }
+                    ctx.strokeStyle = this.color;
+                    ctx.lineWidth = 2;
+                    ctx.lineCap = 'round';
+                    ctx.shadowColor = this.color;
+                    ctx.shadowBlur = 15;
+                    ctx.globalAlpha = 0.6;
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+                    ctx.globalAlpha = 1;
+                }
+
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = 0.9;
+
+                // Geminin gövdesi (farklı tipler)
+                if (this.type === 0) { // Basit üçgen gemi
+                    ctx.beginPath();
+                    ctx.moveTo(-this.size, this.size / 2);
+                    ctx.lineTo(this.size, 0);
+                    ctx.lineTo(-this.size, -this.size / 2);
+                    ctx.closePath();
+                    ctx.fill();
+                } else if (this.type === 1) { // Dikdörtgen ve kanatlar
+                    ctx.fillRect(-this.size * 0.6, -this.size * 0.2, this.size * 1.2, this.size * 0.4);
+                    ctx.beginPath();
+                    ctx.moveTo(-this.size * 0.4, -this.size * 0.5);
+                    ctx.lineTo(-this.size * 0.2, -this.size * 0.2);
+                    ctx.lineTo(this.size * 0.4, -this.size * 0.2);
+                    ctx.lineTo(this.size * 0.2, -this.size * 0.5);
+                    ctx.closePath();
+                    ctx.fill();
+                } else if (this.type === 2) { // Kavisli fütüristik gemi
+                    ctx.beginPath();
+                    ctx.moveTo(-this.size, 0);
+                    ctx.bezierCurveTo(-this.size * 0.5, -this.size * 0.8, this.size * 0.5, -this.size * 0.8, this.size, 0);
+                    ctx.bezierCurveTo(this.size * 0.5, this.size * 0.8, -this.size * 0.5, this.size * 0.8, -this.size, 0);
+                    ctx.closePath();
+                    ctx.fill();
+                } else { // Halkalı gemi
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.size * 0.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.size * 0.3, 0, Math.PI * 2);
+                    ctx.globalCompositeOperation = 'destination-out'; // İçini boşalt
+                    ctx.fill();
+                    ctx.globalCompositeOperation = 'source-over'; // Geri al
+                }
+
+                // Ön ışık
+                const lightRadius = 5 + Math.sin(this.lightPulse) * 3; // Titreyen ışık
+                ctx.beginPath();
+                ctx.arc(this.size * 0.8, 0, lightRadius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255,255,255,0.9)';
+                ctx.shadowColor = 'cyan';
+                ctx.shadowBlur = 10;
+                ctx.fill();
+                ctx.shadowBlur = 0; // Gölgeyi sıfırla
+
+                ctx.restore();
+            }
+        }
+
+        let ships = [];
+        function initShips() {
+            ships = [];
+            for (let i = 0; i < 7; i++) ships.push(new Ship()); // Daha fazla gemi
+        }
+        function drawShips() {
+            ships.forEach(s => { s.update(); s.draw(cCtx); });
+            requestAnimationFrame(drawShips);
+        }
+        initShips();
+        drawShips();
+
+    </script>
 </body>
 </html>
