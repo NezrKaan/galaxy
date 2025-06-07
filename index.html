@@ -2,456 +2,136 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>Cyberpunk Metropolis</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>CSS Cyberpunk Şehir</title>
     <link rel="stylesheet" href="./styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Electrolize&display=swap" rel="stylesheet">
 </head>
 <body>
-    <canvas id="starsCanvas"></canvas>
-    <canvas id="cityCanvas"></canvas>
+    <div id="city-container">
+        </div>
 
     <script>
-        // Global Canvas ve Context Referansları
-        let viewportWidth, viewportHeight;
-        const starsCanvas = document.getElementById('starsCanvas');
-        const sCtx = starsCanvas.getContext('2d');
-        const cityCanvas = document.getElementById('cityCanvas');
-        const cCtx = cityCanvas.getContext('2d');
+        const cityContainer = document.getElementById('city-container');
+        const numBuildings = 30; // Oluşturulacak bina sayısı
+        const numShips = 8;     // Oluşturulacak gemi sayısı
 
-        // --- Ortak Yardımcı Fonksiyonlar ---
+        // Rastgele bir tam sayı döndürür
         function getRandomInt(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
+        // Rastgele bir ondalıklı sayı döndürür
         function getRandomFloat(min, max) {
             return Math.random() * (max - min) + min;
         }
 
-        // --- Boyutlandırma ve Yeniden Boyutlandırma ---
-        function setCanvasDimensions() {
-            viewportWidth = window.innerWidth;
-            viewportHeight = window.innerHeight;
-            starsCanvas.width = cityCanvas.width = viewportWidth;
-            starsCanvas.height = cityCanvas.height = viewportHeight;
+        // --- Binaları Oluştur ---
+        function createBuildings() {
+            cityContainer.innerHTML = ''; // Eski binaları temizle (resize durumunda)
+            const baseBuildingWidth = 100;
+            const baseBuildingHeight = window.innerHeight * 0.4;
+            let currentX = 0;
 
-            // Boyut değiştiğinde tüm elemanları yeniden başlat
-            initStars();
-            initBuildings();
-            initShips();
-        }
-
-        window.addEventListener('resize', setCanvasDimensions);
-        setCanvasDimensions(); // Başlangıçta canvas boyutlarını ayarla
-
-        // --- Yıldız Animasyonu ---
-        class Star {
-            constructor() {
-                this.x = getRandomFloat(0, viewportWidth);
-                this.y = getRandomFloat(0, viewportHeight);
-                this.radius = getRandomFloat(0.5, 2.5);
-                this.alpha = getRandomFloat(0.1, 0.9);
-                this.fadeSpeed = getRandomFloat(0.002, 0.015) * (Math.random() > 0.5 ? 1 : -1);
-            }
-
-            draw() {
-                sCtx.beginPath();
-                sCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                sCtx.fillStyle = `rgba(255, 255, 200, ${this.alpha})`; // Hafif sarımsı beyaz
-                sCtx.shadowColor = `rgba(255, 255, 200, ${this.alpha})`;
-                sCtx.shadowBlur = this.radius * 2;
-                sCtx.fill();
-            }
-
-            update() {
-                this.alpha += this.fadeSpeed;
-                if (this.alpha <= 0 || this.alpha >= 1) {
-                    this.fadeSpeed *= -1; // Yön değiştir
-                    this.alpha = Math.max(0, Math.min(1, this.alpha)); // Sınırları aşmasını engelle
-                }
-            }
-        }
-
-        let stars = [];
-        function initStars() {
-            stars = [];
-            for (let i = 0; i < 250; i++) { // Daha fazla yıldız
-                stars.push(new Star());
-            }
-        }
-
-        function animateStars() {
-            sCtx.clearRect(0, 0, viewportWidth, viewportHeight);
-            stars.forEach(star => {
-                star.update();
-                star.draw();
-            });
-            requestAnimationFrame(animateStars);
-        }
-        animateStars(); // Yıldız animasyonunu başlat
-
-        // --- Bina Animasyonu ---
-        class Building {
-            constructor(x, width, height, hue, depth) {
-                this.x = x;
-                this.width = width;
-                this.height = height;
-                this.hue = hue; // Ana renk tonu
-                this.depth = depth; // 0: en önde, >0: arkada
-                this.windows = [];
-                this.details = []; // Antenler, neon tabelalar, çizgiler
-
-                this.initializeWindows();
-                this.generateDetails();
-            }
-
-            initializeWindows() {
-                const minCols = 4, maxCols = Math.floor(this.width / 15);
-                const minRows = 6, maxRows = Math.floor(this.height / 20);
-
-                const cols = getRandomInt(minCols, maxCols);
-                const rows = getRandomInt(minRows, maxRows);
-
-                const windowSpacingX = this.width / cols;
-                const windowSpacingY = this.height / rows;
-
-                for (let r = 0; r < rows; r++) {
-                    for (let c = 0; c < cols; c++) {
-                        const winWidth = windowSpacingX * getRandomFloat(0.5, 0.7);
-                        const winHeight = windowSpacingY * getRandomFloat(0.6, 0.8);
-                        const px = this.x + c * windowSpacingX + (windowSpacingX - winWidth) / 2;
-                        const py = viewportHeight - this.height + r * windowSpacingY + (windowSpacingY - winHeight) / 2;
-
-                        const isOn = Math.random() < 0.4; // %40 ihtimalle açık
-                        this.windows.push({
-                            x: px, y: py, width: winWidth, height: winHeight,
-                            alpha: isOn ? getRandomFloat(0.7, 1.0) : 0,
-                            colorHue: this.hue + getRandomInt(-20, 20), // Bina tonuna yakın ama farklı
-                            flickerChance: getRandomFloat(0.02, 0.1) // Her pencere için farklı titreşim hızı
-                        });
-                    }
-                }
-            }
-
-            generateDetails() {
-                // Antenler
-                if (Math.random() < 0.6) {
-                    this.details.push({
-                        type: 'antenna',
-                        x: this.x + this.width / 2 + getRandomFloat(-this.width * 0.1, this.width * 0.1),
-                        y: viewportHeight - this.height - getRandomFloat(20, 80),
-                        length: getRandomFloat(30, 100),
-                        color: `hsl(${this.hue}, 40%, 30%)`
-                    });
-                }
-                // Neon Tabelalar
-                if (Math.random() < 0.5) {
-                    const signText = ['NEON', 'CYBER', 'GLOW', 'TECH', 'ARCADE', 'DATA STREAM', 'FUTURE'][getRandomInt(0, 6)];
-                    this.details.push({
-                        type: 'sign',
-                        x: this.x + this.width / 2 + getRandomFloat(-this.width * 0.2, this.width * 0.2),
-                        y: viewportHeight - this.height + getRandomFloat(this.height * 0.2, this.height * 0.7),
-                        text: signText,
-                        color: `hsl(${(this.hue + 180 + getRandomInt(-40, 40)) % 360}, 100%, 65%)`
-                    });
-                }
-                // Işıklı Çizgiler/Boru Hatları
-                if (Math.random() < 0.7) {
-                    for (let i = 0; i < getRandomInt(1, 3); i++) {
-                        this.details.push({
-                            type: 'line',
-                            startX: this.x + getRandomFloat(0, this.width),
-                            startY: viewportHeight - this.height + getRandomFloat(0, this.height),
-                            endX: this.x + getRandomFloat(0, this.width),
-                            endY: viewportHeight - this.height + getRandomFloat(0, this.height),
-                            color: `hsl(${(this.hue + 90 + getRandomInt(-30, 30)) % 360}, 90%, 70%)`,
-                            lineWidth: getRandomFloat(1, 3),
-                            glowBlur: getRandomFloat(5, 15)
-                        });
-                    }
-                }
-            }
-
-            draw() {
-                // Bina gövdesi
-                const baseDarkness = 15 - this.depth * 2; // Derinliğe göre koyuluk
-                const gradient = cCtx.createLinearGradient(this.x, viewportHeight - this.height, this.x, viewportHeight);
-                gradient.addColorStop(0, `hsla(${this.hue}, 50%, ${baseDarkness}%, 0.95)`);
-                gradient.addColorStop(1, `hsla(${this.hue}, 60%, ${baseDarkness - 10}%, 0.98)`);
-                cCtx.fillStyle = gradient;
-                cCtx.strokeStyle = `hsl(${this.hue}, 70%, ${baseDarkness + 10}%)`;
-                cCtx.lineWidth = 1.5;
-                cCtx.fillRect(this.x, viewportHeight - this.height, this.width, this.height);
-                cCtx.strokeRect(this.x, viewportHeight - this.height, this.width, this.height);
-
-                // Pencereler
-                this.windows.forEach(win => {
-                    if (win.alpha <= 0.05) return;
-
-                    // Pencerenin karanlık boşluğunu çiz
-                    cCtx.fillStyle = `rgba(10, 0, 10, 0.2)`;
-                    cCtx.fillRect(win.x, win.y, win.width, win.height);
-
-                    // Işıklı pencere efekti
-                    cCtx.save();
-                    cCtx.beginPath();
-                    cCtx.rect(win.x, win.y, win.width, win.height);
-                    cCtx.fillStyle = `hsla(${win.colorHue}, 100%, 70%, ${win.alpha})`;
-                    cCtx.shadowColor = `hsla(${win.colorHue}, 100%, 70%, ${win.alpha})`;
-                    cCtx.shadowBlur = 8 + win.alpha * 5;
-                    cCtx.fill();
-                    cCtx.restore();
-                });
-
-                // Detaylar
-                this.details.forEach(detail => {
-                    cCtx.save();
-                    if (detail.type === 'antenna') {
-                        cCtx.beginPath();
-                        cCtx.moveTo(detail.x, viewportHeight - this.height);
-                        cCtx.lineTo(detail.x, detail.y);
-                        cCtx.lineWidth = 2;
-                        cCtx.strokeStyle = detail.color;
-                        cCtx.stroke();
-                        // Anten ucu ışığı
-                        cCtx.beginPath();
-                        cCtx.arc(detail.x, detail.y, 3, 0, Math.PI * 2);
-                        cCtx.fillStyle = 'red';
-                        cCtx.shadowColor = 'red';
-                        cCtx.shadowBlur = 5;
-                        cCtx.fill();
-                    } else if (detail.type === 'sign') {
-                        const fontSize = Math.min(20, this.width * 0.2);
-                        cCtx.font = `${fontSize}px 'Electrolize', sans-serif`;
-                        cCtx.textAlign = 'center';
-                        cCtx.fillStyle = detail.color;
-                        cCtx.shadowColor = detail.color;
-                        cCtx.shadowBlur = 15;
-                        cCtx.fillText(detail.text, detail.x, detail.y);
-                    } else if (detail.type === 'line') {
-                        cCtx.beginPath();
-                        cCtx.moveTo(detail.startX, detail.startY);
-                        cCtx.lineTo(detail.endX, detail.endY);
-                        cCtx.strokeStyle = detail.color;
-                        cCtx.lineWidth = detail.lineWidth;
-                        cCtx.shadowColor = detail.color;
-                        cCtx.shadowBlur = detail.glowBlur;
-                        cCtx.stroke();
-                    }
-                    cCtx.restore(); // Gölge ve diğer stilleri sıfırla
-                });
-            }
-
-            updateWindows() {
-                this.windows.forEach(win => {
-                    if (Math.random() < win.flickerChance) {
-                        win.alpha = win.alpha > 0.1 ? 0 : getRandomFloat(0.7, 1.0);
-                    }
-                });
-            }
-        }
-
-        let buildings = [];
-
-        function initBuildings() {
-            buildings = [];
-            const minBuildingWidth = 80;
-            const maxBuildingWidth = 150;
-            const maxBuildingHeightFactor = 0.6; // Max viewport height'ın %60'ı
-            const minBuildingHeightFactor = 0.3; // Min viewport height'ın %30'u
-
-            // Derinlik katmanlarını oluştur (arka plandan öne doğru)
-            // Daha fazla katman daha derinlik hissi verir
-            const numDepthLayers = 3; // 3 katmanlı şehir
-
+            // Arka plan binaları (daha koyu, daha az detaylı görünen)
+            const numDepthLayers = 3; // 3 katman derinlik
             for (let d = 0; d < numDepthLayers; d++) {
-                let currentX = 0;
-                while (currentX < viewportWidth) {
-                    const bw = getRandomFloat(minBuildingWidth, maxBuildingWidth);
-                    const bh = viewportHeight * getRandomFloat(minBuildingHeightFactor + d * 0.05, maxBuildingHeightFactor + d * 0.1); // Katmana göre yükseklik artışı
-                    const bx = currentX + getRandomFloat(-20, 20); // Hafif rastgele x konumu
-                    const baseHue = getRandomInt(0, 360); // Rastgele ana renk tonu
-                    const depth = d; // Katman derinliği (0, 1, 2...)
-                    buildings.push(new Building(bx, bw, bh, baseHue, depth));
-                    currentX += bw - getRandomFloat(10, 30); // Binaların hafifçe üst üste binmesini sağla
-                }
-            }
+                currentX = 0; // Her katman için sıfırla
+                while (currentX < window.innerWidth + baseBuildingWidth * 2) { // Ekran dışına taşacak kadar oluştur
+                    const buildingEl = document.createElement('div');
+                    buildingEl.classList.add('building');
 
-            // Binaları derinliğe (z-index) ve yüksekliğe göre sırala
-            // En arkadaki binalar önce çizilir, sonra öncekiler
-            // Aynı derinlikte, daha uzun binalar altta kalır
-            buildings.sort((a, b) => {
-                if (a.depth !== b.depth) {
-                    return a.depth - b.depth;
-                }
-                return a.height - b.height;
-            });
-        }
+                    const width = getRandomFloat(baseBuildingWidth * 0.6, baseBuildingWidth * 1.5);
+                    const height = window.innerHeight * getRandomFloat(0.3 + d * 0.1, 0.7 + d * 0.05); // Katmana göre yükseklik varyasyonu
 
-        function animateBuildings() {
-            // Şehir canvas'ı için clearRect sadece bir kere yapılır
-            // Bu, gemilerin iz bırakmasına izin verir (isteğe bağlı)
-            // cCtx.clearRect(0, 0, viewportWidth, viewportHeight); // Sadece bir kere temizle
-            // Ya da her karede temizleyip gemileri de tekrar çizdir.
-            // Bu setup'ta, drawBuildings her karede clearRect yapacak.
+                    const x = currentX + getRandomFloat(-width * 0.2, width * 0.2); // Hafif rastgele konum
+                    const hue = getRandomInt(0, 360); // Rastgele ana renk tonu
 
-            cCtx.clearRect(0, 0, viewportWidth, viewportHeight); // Her frame'de temizle
+                    buildingEl.style.width = `${width}px`;
+                    buildingEl.style.height = `${height}px`;
+                    buildingEl.style.left = `${x}px`;
+                    buildingEl.style.bottom = '0'; // Zemine hizala
+                    buildingEl.style.setProperty('--building-hue', hue);
+                    buildingEl.style.setProperty('--depth-factor', d); // CSS'te derinlik efekti için
+                    buildingEl.style.setProperty('--building-height', height); // CSS'te font boyutu vb için
 
-            buildings.forEach(b => {
-                b.draw();
-                b.updateWindows();
-            });
-            requestAnimationFrame(animateBuildings);
-        }
-        animateBuildings(); // Bina animasyonunu başlat
-
-        // --- Gemi Animasyonu ---
-        class Ship {
-            constructor() {
-                this.reset();
-            }
-
-            reset() {
-                this.x = getRandomFloat(-viewportWidth * 0.7, -100); // Ekranın oldukça dışından başla
-                this.y = getRandomFloat(viewportHeight * 0.1, viewportHeight * 0.6); // Gökyüzünün ortasında uçuş
-                this.vx = getRandomFloat(1.5, 4.0); // Daha çeşitli hızlar
-                this.vy = getRandomFloat(-0.2, 0.2); // Hafif dikey dalgalanma
-                this.size = getRandomFloat(30, 70); // Daha büyük ve çeşitli gemiler
-                this.hue = getRandomInt(0, 360);
-                this.color = `hsl(${this.hue}, 100%, 65%)`; // Dinamik renkler
-                this.type = getRandomInt(0, 3); // 4 farklı gemi tipi
-                this.hasTrail = Math.random() < 0.8; // Daha yüksek iz bırakma olasılığı
-                this.trailPoints = [];
-                this.lightPulsePhase = getRandomFloat(0, Math.PI * 2); // Işık atışı başlangıç fazı
-                this.lightPulseSpeed = getRandomFloat(0.05, 0.15); // Işık atışı hızı
-            }
-
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-
-                // Sinüs dalgası ile daha yumuşak dikey hareket
-                this.y += Math.sin(this.x * 0.015 + this.lightPulsePhase) * getRandomFloat(0.2, 0.8);
-
-                // Ekran dışına çıkınca sıfırla
-                if (this.x > viewportWidth + this.size + 200) {
-                    this.reset();
-                }
-
-                // Işık izi güncelleme
-                if (this.hasTrail) {
-                    this.trailPoints.push({ x: this.x, y: this.y, alpha: 1 });
-                    if (this.trailPoints.length > 40) { // Daha uzun iz
-                        this.trailPoints.shift();
+                    // Rastgele pencere gridi oluştur
+                    const numWindowRows = getRandomInt(5, Math.floor(height / 20));
+                    const numWindowCols = getRandomInt(3, Math.floor(width / 20));
+                    for (let r = 0; r < numWindowRows; r++) {
+                        for (let c = 0; c < numWindowCols; c++) {
+                            const windowEl = document.createElement('div');
+                            windowEl.classList.add('window');
+                            // CSS ile animasyon kontrolü
+                            windowEl.style.setProperty('--window-delay', `${getRandomFloat(0, 5)}s`); // Farklı gecikmeler
+                            windowEl.style.setProperty('--window-duration', `${getRandomFloat(0.5, 2)}s`); // Farklı animasyon süreleri
+                            windowEl.style.setProperty('--window-hue', `${getRandomInt(-20, 20)}`); // Pencere renk varyasyonu
+                            buildingEl.appendChild(windowEl);
+                        }
                     }
-                    this.trailPoints.forEach(p => p.alpha *= 0.92); // Daha yavaş solma
-                    this.trailPoints = this.trailPoints.filter(p => p.alpha > 0.05); // Çok sönükleri temizle
-                }
 
-                this.lightPulsePhase += this.lightPulseSpeed;
-            }
-
-            draw() {
-                cCtx.save();
-                cCtx.translate(this.x, this.y);
-
-                // Işık izi çizimi
-                if (this.hasTrail && this.trailPoints.length > 1) {
-                    cCtx.beginPath();
-                    cCtx.moveTo(this.trailPoints[0].x - this.x, this.trailPoints[0].y - this.y);
-                    for (let i = 1; i < this.trailPoints.length; i++) {
-                        cCtx.lineTo(this.trailPoints[i].x - this.x, this.trailPoints[i].y - this.y);
+                    // Rastgele detaylar (anten, tabela)
+                    if (Math.random() < 0.5 && d === 0) { // Sadece öndeki binalarda detay
+                        const detailType = Math.random() < 0.6 ? 'antenna' : 'sign';
+                        const detailEl = document.createElement('div');
+                        detailEl.classList.add('building-detail', detailType);
+                        if (detailType === 'sign') {
+                            detailEl.textContent = ['NEON', 'CYBER', 'GLOW', 'TECH', 'ARCADE', 'DATA'][getRandomInt(0, 5)];
+                            detailEl.style.setProperty('--sign-hue', `${(hue + 180 + getRandomInt(-30, 30)) % 360}`);
+                        }
+                        buildingEl.appendChild(detailEl);
                     }
-                    cCtx.strokeStyle = this.color;
-                    cCtx.lineWidth = 3; // Daha kalın iz
-                    cCtx.lineCap = 'round';
-                    cCtx.shadowColor = this.color;
-                    cCtx.shadowBlur = 20; // Daha güçlü ışıma
-                    cCtx.globalAlpha = 0.7;
-                    cCtx.stroke();
+
+                    cityContainer.appendChild(buildingEl);
+                    currentX += width - getRandomFloat(10, 30); // Binaların üst üste binmesini sağla
                 }
-
-                cCtx.globalAlpha = 0.9;
-                cCtx.fillStyle = this.color;
-                cCtx.shadowBlur = 0; // Gölgeyi sıfırla ki sadece izde kalsın
-
-                // Geminin gövdesi (farklı tipler)
-                if (this.type === 0) { // İnce, hızlı gemi
-                    cCtx.beginPath();
-                    cCtx.moveTo(-this.size, this.size * 0.2);
-                    cCtx.lineTo(this.size, 0);
-                    cCtx.lineTo(-this.size, -this.size * 0.2);
-                    cCtx.lineTo(-this.size * 0.8, 0); // Kuyruğu biraz daralt
-                    cCtx.closePath();
-                    cCtx.fill();
-                } else if (this.type === 1) { // Geniş kargo gemisi
-                    cCtx.fillRect(-this.size * 0.8, -this.size * 0.4, this.size * 1.6, this.size * 0.8);
-                    // Kanatlar
-                    cCtx.beginPath();
-                    cCtx.moveTo(-this.size * 0.5, -this.size * 0.8);
-                    cCtx.lineTo(-this.size * 0.2, -this.size * 0.4);
-                    cCtx.lineTo(this.size * 0.2, -this.size * 0.4);
-                    cCtx.lineTo(this.size * 0.5, -this.size * 0.8);
-                    cCtx.closePath();
-                    cCtx.fill();
-                    cCtx.beginPath();
-                    cCtx.moveTo(-this.size * 0.5, this.size * 0.8);
-                    cCtx.lineTo(-this.size * 0.2, this.size * 0.4);
-                    cCtx.lineTo(this.size * 0.2, this.size * 0.4);
-                    cCtx.lineTo(this.size * 0.5, this.size * 0.8);
-                    cCtx.closePath();
-                    cCtx.fill();
-                } else if (this.type === 2) { // Uzun, fütüristik tekne
-                    cCtx.beginPath();
-                    cCtx.moveTo(-this.size * 0.8, 0);
-                    cCtx.bezierCurveTo(-this.size * 0.2, -this.size * 0.6, this.size * 0.2, -this.size * 0.6, this.size * 0.8, 0);
-                    cCtx.bezierCurveTo(this.size * 0.2, this.size * 0.6, -this.size * 0.2, this.size * 0.6, -this.size * 0.8, 0);
-                    cCtx.closePath();
-                    cCtx.fill();
-                } else { // Drone benzeri dörtlü gövde
-                    const segmentSize = this.size * 0.3;
-                    const spacing = this.size * 0.4;
-                    cCtx.fillRect(-spacing - segmentSize/2, -segmentSize/2, segmentSize, segmentSize);
-                    cCtx.fillRect( spacing - segmentSize/2, -segmentSize/2, segmentSize, segmentSize);
-                    cCtx.fillRect(-segmentSize/2, -spacing - segmentSize/2, segmentSize, segmentSize);
-                    cCtx.fillRect(-segmentSize/2,  spacing - segmentSize/2, segmentSize, segmentSize);
-                }
-
-                // Ön ışıklandırma (titreyen ve renkli)
-                const lightRadius = 5 + Math.sin(this.lightPulsePhase) * 4;
-                cCtx.beginPath();
-                cCtx.arc(this.size * 0.7, 0, lightRadius, 0, Math.PI * 2);
-                cCtx.fillStyle = `hsl(${(this.hue + 60) % 360}, 100%, 75%, 0.9)`;
-                cCtx.shadowColor = `hsl(${(this.hue + 60) % 360}, 100%, 75%)`;
-                cCtx.shadowBlur = lightRadius * 2;
-                cCtx.fill();
-                cCtx.shadowBlur = 0;
-
-                cCtx.restore();
             }
         }
 
-        let ships = [];
-        function initShips() {
-            ships = [];
-            for (let i = 0; i < 10; i++) ships.push(new Ship()); // Daha fazla gemi
+        // --- Gemileri Oluştur ---
+        function createShips() {
+            for (let i = 0; i < numShips; i++) {
+                const shipEl = document.createElement('div');
+                shipEl.classList.add('ship');
+
+                const startX = getRandomFloat(-window.innerWidth * 0.7, -100);
+                const startY = getRandomFloat(window.innerHeight * 0.1, window.innerHeight * 0.6);
+                const speed = getRandomFloat(5, 15); // CSS animation-duration ile ilişkili
+                const size = getRandomFloat(40, 90); // Gemi boyutu
+
+                shipEl.style.left = `${startX}px`;
+                shipEl.style.top = `${startY}px`;
+                shipEl.style.width = `${size}px`;
+                shipEl.style.height = `${size * getRandomFloat(0.5, 0.8)}px`; // Hafif orantı varyasyonu
+                shipEl.style.animationDuration = `${getRandomFloat(20, 40)}s`; // Animasyon süresi (hız)
+                shipEl.style.animationDelay = `-${getRandomFloat(0, 20)}s`; // Animasyon gecikmesi (farklı başlangıç pozisyonları)
+                shipEl.style.setProperty('--ship-hue', `${getRandomInt(0, 360)}`); // Gemi rengi
+                shipEl.style.setProperty('--ship-type', getRandomInt(0, 3)); // CSS ile farklı tipler
+                shipEl.style.setProperty('--vertical-amplitude', `${getRandomFloat(20, 50)}px`); // Dikey hareket genliği
+                shipEl.style.setProperty('--vertical-speed', `${getRandomFloat(5, 15)}s`); // Dikey hareket hızı
+
+                cityContainer.appendChild(shipEl);
+            }
         }
 
-        function animateShips() {
-            ships.forEach(ship => { ship.update(); });
-            // Gemiler her karede temizlenen cityCanvas'a drawBuildings'ten sonra çizilir
-            // Bu şekilde binaların üzerinden geçerler.
-            requestAnimationFrame(animateShips);
-        }
+        // Sayfa yüklendiğinde ve boyut değiştiğinde her şeyi yeniden oluştur
+        window.addEventListener('load', () => {
+            createBuildings();
+            createShips();
+        });
+        window.addEventListener('resize', () => {
+            createBuildings(); // Binaları yeniden oluştur
+            // Gemileri de yeniden oluşturmak gerekir, aksi takdirde eski pozisyonlarında kalabilirler.
+            // Ancak bu, sayfayı her yeniden boyutlandırdığınızda mevcut gemilerin kaybolmasına neden olur.
+            // Eğer isterseniz, gemilerin konumunu JavaScript ile dinamik olarak ayarlayabiliriz.
+            // Şimdilik sadece yeniden oluşturma yeterli.
+            createShips();
+        });
+        
+        // İlk yüklemede çalıştır
+        createBuildings();
+        createShips();
 
-        // Tüm animasyon döngülerini başlatma
-        // init fonksiyonları setCanvasDimensions() içinde çağrılıyor
-        // Animate fonksiyonları requestAnimationFrame ile sürekli çalışıyor
-        // drawBuildings her karede canvas'ı temizlediği için,
-        // drawShips içindeki cCtx.clearRect() tekrarına gerek kalmaz.
-        animateStars();
-        animateBuildings(); // Bu, cCtx.clearRect'i de içerir
-        animateShips();     // Gemiler binaların üzerine çizilir
     </script>
 </body>
 </html>
