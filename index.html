@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -22,372 +21,393 @@
             --cloud-color: #FFFFFF;
         }
 
-```
-    /* Base Styles */
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    html, body {
-        height: 100vh;
-        font-family: Arial, sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: #E6FFFF;
-        overflow: hidden;
-    }
+        html, body {
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: transparent; /* Set background to transparent */
+            overflow: hidden;
+        }
 
-    /* Container for your Landscape */
-    .outer-container {
-        position: relative;
-        width: min(90vw, 400px);
-        height: min(90vh, 600px);
-        background: #FAE0C8;
-        border-radius: 20px;
-        overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    }
-
-    /* Main Landscape Container */
-    .landscape-container {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(to bottom, var(--sky-color-1), var(--sky-color-2), var(--sky-color-3));
-        transition: background 2s ease-in-out;
-    }
-
-    /* Sky and Celestial Bodies */
-    .sky {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-    }
-
-    .sun {
-        position: absolute;
-        width: 80px;
-        height: 80px;
-        background: radial-gradient(circle, var(--sun-color) 60%, rgba(255, 215, 0, 0.3) 100%);
-        border-radius: 50%;
-        box-shadow: 0 0 50px rgba(255, 215, 0, 0.6);
-        transition: all 2s ease-in-out;
-        opacity: 1;
-    }
-
-    .moon {
-        position: absolute;
-        width: 60px;
-        height: 60px;
-        background: var(--moon-color);
-        border-radius: 50%;
-        box-shadow: 0 0 30px rgba(245, 245, 220, 0.5);
-        transition: all 2s ease-in-out;
-        opacity: 0;
-        overflow: hidden;
-    }
-
-    /* Moon craters */
-    .moon::before {
-        content: '';
-        position: absolute;
-        width: 8px;
-        height: 8px;
-        background: rgba(0, 0, 0, 0.2);
-        border-radius: 50%;
-        top: 15px;
-        left: 20px;
-        box-shadow: 
-            10px 5px 0 -2px rgba(0, 0, 0, 0.15),
-            -5px 15px 0 -3px rgba(0, 0, 0, 0.1),
-            15px 20px 0 -4px rgba(0, 0, 0, 0.12),
-            5px 35px 0 -2px rgba(0, 0, 0, 0.08);
-    }
-
-    /* Stars */
-    .stars {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        transition: opacity 2s ease-in-out;
-    }
-
-    .star {
-        position: absolute;
-        width: 2px;
-        height: 2px;
-        background: var(--star-color);
-        border-radius: 50%;
-        animation: twinkle 3s infinite alternate;
-    }
-
-    @keyframes twinkle {
-        0% { opacity: 0.3; transform: scale(1); }
-        100% { opacity: 1; transform: scale(1.2); }
-    }
-
-    /* Clouds */
-    .cloud {
-        position: absolute;
-        opacity: 0.8;
-    }
-
-    .cloud-part {
-        position: absolute;
-        background: var(--cloud-color);
-        border-radius: 50px;
-    }
-
-    .cloud1 {
-        animation: float-cloud 30s infinite linear;
-    }
-
-    .cloud2 {
-        animation: float-cloud 45s infinite linear reverse;
-        animation-delay: -10s;
-    }
-
-    @keyframes float-cloud {
-        0% { transform: translateX(-200px); }
-        100% { transform: translateX(calc(100% + 200px)); }
-    }
-
-    /* Mountains */
-    .mountain {
-        position: absolute;
-        top: 40%;
-        left: calc(50% - 130px);
-        opacity: 1;
-        transform: scale(0.9);
-        transform-origin: bottom center;
-    }
-
-    .mountain .backdrop {
-        position: absolute;
-        top: 80px;
-        left: -180px;
-        width: 0;
-        height: 0;
-        border-left: 260px solid transparent;
-        border-right: 260px solid transparent;
-        border-bottom: 200px solid var(--mountain1);
-    }
-
-    .mountain .zig {
-        position: absolute;
-        width: 0;
-        height: 0;
-        transform: rotate(217deg);
-    }
-
-    .mountain .zig.zag1 {
-        top: 83px;
-        left: 70px;
-        border-left: 10px solid transparent;
-        border-right: 10px solid transparent;
-        border-bottom: 30px solid var(--mountain2);
-    }
-
-    .mountain .zig.zag2 {
-        top: 94px;
-        left: 70px;
-        border-left: 20px solid transparent;
-        border-right: 20px solid transparent;
-        border-bottom: 60px solid var(--mountain2);
-    }
-
-    .mountain .zig.zag3 {
-        top: 115px;
-        left: 84px;
-        border-left: 30px solid transparent;
-        border-right: 30px solid transparent;
-        border-bottom: 80px solid var(--mountain2);
-    }
-
-    .mountain .zig.zag4 {
-        top: 137px;
-        left: 100px;
-        border-left: 40px solid transparent;
-        border-right: 40px solid transparent;
-        border-bottom: 100px solid var(--mountain2);
-    }
-
-    /* Trees - More trees to fill the space */
-    .tree {
-        opacity: 1;
-        position: absolute;
-        transform: scale(0.7);
-        transform-origin: bottom center;
-    }
-
-    .tree > div {
-        position: absolute;
-    }
-
-    /* Tree Back Layer - More trees */
-    .tree.treeBack > div {
-        border-bottom-color: var(--tree3);
-    }
-
-    .tree.treeBack.tree1 { top: 55%; left: -5%; }
-    .tree.treeBack.tree2 { top: 56%; left: 5%; }
-    .tree.treeBack.tree3 { top: 58%; left: 15%; }
-    .tree.treeBack.tree4 { top: 57%; left: 25%; }
-    .tree.treeBack.tree5 { top: 56%; left: 35%; }
-    .tree.treeBack.tree6 { top: 57%; left: 45%; }
-    .tree.treeBack.tree7 { top: 55%; left: 55%; }
-    .tree.treeBack.tree8 { top: 56%; left: 65%; }
-    .tree.treeBack.tree9 { top: 58%; left: 75%; }
-    .tree.treeBack.tree10 { top: 57%; left: 85%; }
-    .tree.treeBack.tree11 { top: 55%; left: 95%; }
-
-    /* Tree Mid Layer - More trees */
-    .tree.treeMid > div {
-        border-bottom-color: var(--tree2);
-    }
-
-    .tree.treeMid.tree1 { top: 65%; left: 0%; }
-    .tree.treeMid.tree2 { top: 67%; left: 8%; }
-    .tree.treeMid.tree3 { top: 66%; left: 18%; }
-    .tree.treeMid.tree4 { top: 65%; left: 28%; }
-    .tree.treeMid.tree5 { top: 64%; left: 38%; }
-    .tree.treeMid.tree6 { top: 66%; left: 48%; }
-    .tree.treeMid.tree7 { top: 65%; left: 58%; }
-    .tree.treeMid.tree8 { top: 67%; left: 68%; }
-    .tree.treeMid.tree9 { top: 66%; left: 78%; }
-    .tree.treeMid.tree10 { top: 65%; left: 88%; }
-
-    /* Tree Front Layer - More trees */
-    .tree.treeFront > div {
-        border-bottom-color: var(--tree1);
-    }
-
-    .tree.treeFront.tree1 { top: 75%; left: 2%; }
-    .tree.treeFront.tree2 { top: 78%; left: 12%; }
-    .tree.treeFront.tree3 { top: 80%; left: 22%; }
-    .tree.treeFront.tree4 { top: 77%; left: 32%; }
-    .tree.treeFront.tree5 { top: 76%; left: 42%; }
-    .tree.treeFront.tree6 { top: 79%; left: 52%; }
-    .tree.treeFront.tree7 { top: 78%; left: 62%; }
-    .tree.treeFront.tree8 { top: 77%; left: 72%; }
-    .tree.treeFront.tree9 { top: 80%; left: 82%; }
-    .tree.treeFront.tree10 { top: 78%; left: 92%; }
-
-    /* Tree Structure Parts */
-    .tree .top {
-        border-left: 17px solid transparent;
-        border-right: 17px solid transparent;
-        border-bottom: 45px solid;
-    }
-
-    .tree .mid {
-        top: 16px;
-        left: -7px;
-        border-left: 24px solid transparent;
-        border-right: 24px solid transparent;
-        border-bottom: 58px solid;
-    }
-
-    .tree .bot {
-        top: 30px;
-        left: -12px;
-        border-left: 29px solid transparent;
-        border-right: 29px solid transparent;
-        border-bottom: 68px solid;
-    }
-
-    .tree .base {
-        top: 44px;
-        left: -16px;
-        border-left: 33px solid transparent;
-        border-right: 33px solid transparent;
-        border-bottom: 75px solid;
-    }
-
-    /* Time Display */
-    .time-display {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        background: rgba(0, 0, 0, 0.7);
-        color: white;
-        padding: 8px 12px;
-        border-radius: 8px;
-        font-family: 'Courier New', monospace;
-        font-size: 12px;
-        z-index: 1000;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
+        /* Container for your Landscape */
         .outer-container {
-            width: 95vw;
-            height: 85vh;
-            border-radius: 15px;
+            position: relative;
+            width: min(90vw, 400px);
+            height: min(90vh, 600px);
+            background: transparent; /* Set background to transparent */
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
-        .sun, .moon {
-            width: 50px;
-            height: 50px;
+
+        /* Main Landscape Container */
+        .landscape-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--sky-color-1), var(--sky-color-2), var(--sky-color-3));
+            transition: background 2s ease-in-out;
         }
+
+        /* Sky and Celestial Bodies */
+        .sky {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .sun {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, var(--sun-color) 60%, rgba(255, 215, 0, 0.3) 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.6);
+            transition: all 2s ease-in-out;
+            opacity: 1;
+            z-index: 2; /* Ensure sun is above mountains */
+        }
+
+        .moon {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: var(--moon-color);
+            border-radius: 50%;
+            box-shadow: 0 0 30px rgba(245, 245, 220, 0.5);
+            transition: all 2s ease-in-out;
+            opacity: 0;
+            overflow: hidden;
+            z-index: 2; /* Ensure moon is above mountains */
+        }
+
+        /* Moon craters */
+        .moon::before {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+            top: 15px;
+            left: 20px;
+            box-shadow: 
+                10px 5px 0 -2px rgba(0, 0, 0, 0.15),
+                -5px 15px 0 -3px rgba(0, 0, 0, 0.1),
+                15px 20px 0 -4px rgba(0, 0, 0, 0.12),
+                5px 35px 0 -2px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Stars */
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+            z-index: 1; /* Below sun/moon */
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--star-color);
+            border-radius: 50%;
+            animation: twinkle 3s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Clouds */
+        .cloud {
+            position: absolute;
+            opacity: 0.8;
+            z-index: 3; /* Above sun/moon/mountains */
+        }
+
+        .cloud-part {
+            position: absolute;
+            background: var(--cloud-color);
+            border-radius: 50px;
+        }
+
+        .cloud1 {
+            animation: float-cloud 30s infinite linear;
+        }
+
+        .cloud2 {
+            animation: float-cloud 45s infinite linear reverse;
+            animation-delay: -10s;
+        }
+
+        @keyframes float-cloud {
+            0% { transform: translateX(-200px); }
+            100% { transform: translateX(calc(100% + 200px)); }
+        }
+
+        /* Mountains */
         .mountain {
+            position: absolute;
+            opacity: 1;
+            transform-origin: bottom center;
+            z-index: 4; /* Above trees */
+        }
+
+        .mountain .backdrop {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 260px solid transparent;
+            border-right: 260px solid transparent;
+            border-bottom: 200px solid var(--mountain1);
+        }
+
+        .mountain .zig {
+            position: absolute;
+            width: 0;
+            height: 0;
+            transform: rotate(217deg);
+        }
+
+        .mountain .zig.zag1 {
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 30px solid var(--mountain2);
+        }
+
+        .mountain .zig.zag2 {
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-bottom: 60px solid var(--mountain2);
+        }
+
+        .mountain .zig.zag3 {
+            border-left: 30px solid transparent;
+            border-right: 30px solid transparent;
+            border-bottom: 80px solid var(--mountain2);
+        }
+
+        .mountain .zig.zag4 {
+            border-left: 40px solid transparent;
+            border-right: 40px solid transparent;
+            border-bottom: 100px solid var(--mountain2);
+        }
+
+        /* Mountain 1 - positioned like the tree examples */
+        .mountain.mountain1 {
+            top: 40%;
+            left: 10%;
+            transform: scale(0.9) rotate(-5deg); /* Slightly rotated for variation */
+        }
+        .mountain.mountain1 .backdrop { top: 80px; left: -180px; }
+        .mountain.mountain1 .zig.zag1 { top: 83px; left: 70px; }
+        .mountain.mountain1 .zig.zag2 { top: 94px; left: 70px; }
+        .mountain.mountain1 .zig.zag3 { top: 115px; left: 84px; }
+        .mountain.mountain1 .zig.zag4 { top: 137px; left: 100px; }
+
+        /* Mountain 2 - positioned like the tree examples */
+        .mountain.mountain2 {
+            top: 45%; /* Slightly lower to create depth */
+            left: 55%;
+            transform: scale(0.75) rotate(10deg); /* Smaller and rotated */
+        }
+        .mountain.mountain2 .backdrop { top: 60px; left: -150px; border-bottom: 150px solid var(--mountain1); border-left: 200px solid transparent; border-right: 200px solid transparent;}
+        .mountain.mountain2 .zig.zag1 { top: 63px; left: 60px; border-bottom: 25px solid var(--mountain2); }
+        .mountain.mountain2 .zig.zag2 { top: 70px; left: 60px; border-bottom: 50px solid var(--mountain2); }
+        .mountain.mountain2 .zig.zag3 { top: 85px; left: 70px; border-bottom: 65px solid var(--mountain2); }
+        .mountain.mountain2 .zig.zag4 { top: 100px; left: 80px; border-bottom: 80px solid var(--mountain2); }
+
+
+        /* Trees - More trees to fill the space */
+        .tree {
+            opacity: 1;
+            position: absolute;
             transform: scale(0.7);
-            top: 35%;
+            transform-origin: bottom center;
+            z-index: 5; /* Above mountains */
         }
-        .tree {
-            transform: scale(0.6);
+
+        .tree > div {
+            position: absolute;
         }
+
+        /* Tree Back Layer - More trees */
+        .tree.treeBack > div {
+            border-bottom-color: var(--tree3);
+        }
+
+        .tree.treeBack.tree1 { top: 55%; left: -5%; }
+        .tree.treeBack.tree2 { top: 56%; left: 5%; }
+        .tree.treeBack.tree3 { top: 58%; left: 15%; }
+        .tree.treeBack.tree4 { top: 57%; left: 25%; }
+        .tree.treeBack.tree5 { top: 56%; left: 35%; }
+        .tree.treeBack.tree6 { top: 57%; left: 45%; }
+        .tree.treeBack.tree7 { top: 55%; left: 55%; }
+        .tree.treeBack.tree8 { top: 56%; left: 65%; }
+        .tree.treeBack.tree9 { top: 58%; left: 75%; }
+        .tree.treeBack.tree10 { top: 57%; left: 85%; }
+        .tree.treeBack.tree11 { top: 55%; left: 95%; }
+
+        /* Tree Mid Layer - More trees */
+        .tree.treeMid > div {
+            border-bottom-color: var(--tree2);
+        }
+
+        .tree.treeMid.tree1 { top: 65%; left: 0%; }
+        .tree.treeMid.tree2 { top: 67%; left: 8%; }
+        .tree.treeMid.tree3 { top: 66%; left: 18%; }
+        .tree.treeMid.tree4 { top: 65%; left: 28%; }
+        .tree.treeMid.tree5 { top: 64%; left: 38%; }
+        .tree.treeMid.tree6 { top: 66%; left: 48%; }
+        .tree.treeMid.tree7 { top: 65%; left: 58%; }
+        .tree.treeMid.tree8 { top: 67%; left: 68%; }
+        .tree.treeMid.tree9 { top: 66%; left: 78%; }
+        .tree.treeMid.tree10 { top: 65%; left: 88%; }
+
+        /* Tree Front Layer - More trees */
+        .tree.treeFront > div {
+            border-bottom-color: var(--tree1);
+        }
+
+        .tree.treeFront.tree1 { top: 75%; left: 2%; }
+        .tree.treeFront.tree2 { top: 78%; left: 12%; }
+        .tree.treeFront.tree3 { top: 80%; left: 22%; }
+        .tree.treeFront.tree4 { top: 77%; left: 32%; }
+        .tree.treeFront.tree5 { top: 76%; left: 42%; }
+        .tree.treeFront.tree6 { top: 79%; left: 52%; }
+        .tree.treeFront.tree7 { top: 78%; left: 62%; }
+        .tree.treeFront.tree8 { top: 77%; left: 72%; }
+        .tree.treeFront.tree9 { top: 80%; left: 82%; }
+        .tree.treeFront.tree10 { top: 78%; left: 92%; }
+
+        /* Tree Structure Parts */
+        .tree .top {
+            border-left: 17px solid transparent;
+            border-right: 17px solid transparent;
+            border-bottom: 45px solid;
+        }
+
+        .tree .mid {
+            top: 16px;
+            left: -7px;
+            border-left: 24px solid transparent;
+            border-right: 24px solid transparent;
+            border-bottom: 58px solid;
+        }
+
+        .tree .bot {
+            top: 30px;
+            left: -12px;
+            border-left: 29px solid transparent;
+            border-right: 29px solid transparent;
+            border-bottom: 68px solid;
+        }
+
+        .tree .base {
+            top: 44px;
+            left: -16px;
+            border-left: 33px solid transparent;
+            border-right: 33px solid transparent;
+            border-bottom: 75px solid;
+        }
+
+        /* Time Display */
         .time-display {
-            font-size: 10px;
-            padding: 6px 8px;
-            top: 8px;
-            left: 8px;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            z-index: 1000;
         }
-    }
 
-    @media (max-width: 480px) {
-        .outer-container {
-            width: 98vw;
-            height: 90vh;
-            border-radius: 10px;
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .outer-container {
+                width: 95vw;
+                height: 85vh;
+                border-radius: 15px;
+            }
+            .sun, .moon {
+                width: 50px;
+                height: 50px;
+            }
+            .mountain {
+                transform: scale(0.7);
+                top: 35%;
+            }
+            .mountain.mountain1 { left: 5%; }
+            .mountain.mountain2 { left: 50%; }
+            .tree {
+                transform: scale(0.6);
+            }
+            .time-display {
+                font-size: 10px;
+                padding: 6px 8px;
+                top: 8px;
+                left: 8px;
+            }
         }
-        .sun, .moon {
-            width: 40px;
-            height: 40px;
-        }
-        .mountain {
-            transform: scale(0.6);
-            top: 30%;
-        }
-        .tree {
-            transform: scale(0.5);
-        }
-        .time-display {
-            font-size: 9px;
-            padding: 4px 6px;
-        }
-    }
 
-    /* Landscape orientation for mobile */
-    @media (max-height: 500px) and (orientation: landscape) {
-        .outer-container {
-            width: 85vh;
-            height: 95vh;
+        @media (max-width: 480px) {
+            .outer-container {
+                width: 98vw;
+                height: 90vh;
+                border-radius: 10px;
+            }
+            .sun, .moon {
+                width: 40px;
+                height: 40px;
+            }
+            .mountain {
+                transform: scale(0.6);
+                top: 30%;
+            }
+            .mountain.mountain1 { left: 0%; }
+            .mountain.mountain2 { left: 45%; }
+            .tree {
+                transform: scale(0.5);
+            }
+            .time-display {
+                font-size: 9px;
+                padding: 4px 6px;
+            }
         }
-        .mountain {
-            top: 25%;
-            transform: scale(0.8);
-        }
-    }
-</style>
-```
 
+        /* Landscape orientation for mobile */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .outer-container {
+                width: 85vh;
+                height: 95vh;
+            }
+            .mountain {
+                top: 25%;
+                transform: scale(0.8);
+            }
+            .mountain.mountain1 { left: 10%; }
+            .mountain.mountain2 { left: 55%; }
+        }
+    </style>
 </head>
 <body>
     <div class="outer-container">
@@ -397,240 +417,250 @@
                 <div>Mode: <span id="currentMode">Day</span></div>
             </div>
 
-```
-        <div class="sky">
-            <div class="sun" id="sun"></div>
-            
-            <div class="moon" id="moon"></div>
-            
-            <div class="stars" id="stars"></div>
-            
-            <div class="cloud cloud1" id="cloud1">
-                <div class="cloud-part" style="width: 60px; height: 30px; top: 10px; left: 0;"></div>
-                <div class="cloud-part" style="width: 50px; height: 35px; top: 5px; left: 40px;"></div>
-                <div class="cloud-part" style="width: 45px; height: 25px; top: 15px; left: 70px;"></div>
-                <div class="cloud-part" style="width: 30px; height: 20px; top: 20px; left: 100px;"></div>
+            <div class="sky">
+                <div class="sun" id="sun"></div>
+                <div class="moon" id="moon"></div>
+                <div class="stars" id="stars"></div>
+                
+                <div class="cloud cloud1" id="cloud1">
+                    <div class="cloud-part" style="width: 60px; height: 30px; top: 10px; left: 0;"></div>
+                    <div class="cloud-part" style="width: 50px; height: 35px; top: 5px; left: 40px;"></div>
+                    <div class="cloud-part" style="width: 45px; height: 25px; top: 15px; left: 70px;"></div>
+                    <div class="cloud-part" style="width: 30px; height: 20px; top: 20px; left: 100px;"></div>
+                </div>
+                
+                <div class="cloud cloud2" id="cloud2">
+                    <div class="cloud-part" style="width: 40px; height: 25px; top: 5px; left: 0;"></div>
+                    <div class="cloud-part" style="width: 55px; height: 30px; top: 0; left: 25px;"></div>
+                    <div class="cloud-part" style="width: 35px; height: 20px; top: 10px; left: 60px;"></div>
+                </div>
             </div>
-            
-            <div class="cloud cloud2" id="cloud2">
-                <div class="cloud-part" style="width: 40px; height: 25px; top: 5px; left: 0;"></div>
-                <div class="cloud-part" style="width: 55px; height: 30px; top: 0; left: 25px;"></div>
-                <div class="cloud-part" style="width: 35px; height: 20px; top: 10px; left: 60px;"></div>
+
+            <div class="mountain mountain1">
+                <div class="backdrop"></div>
+                <div class="zig zag1"></div>
+                <div class="zig zag2"></div>
+                <div class="zig zag3"></div>
+                <div class="zig zag4"></div>
             </div>
+            <div class="mountain mountain2">
+                <div class="backdrop"></div>
+                <div class="zig zag1"></div>
+                <div class="zig zag2"></div>
+                <div class="zig zag3"></div>
+                <div class="zig zag4"></div>
+            </div>
+
+            <div class="tree treeBack tree1"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeBack tree2"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeBack tree3"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeBack tree4"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeBack tree5"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeBack tree6"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeBack tree7"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeBack tree8"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeBack tree9"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeBack tree10"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeBack tree11"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+
+            <div class="tree treeMid tree1"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeMid tree2"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeMid tree3"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeMid tree4"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeMid tree5"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeMid tree6"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeMid tree7"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeMid tree8"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeMid tree9"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeMid tree10"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+
+            <div class="tree treeFront tree1"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeFront tree2"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeFront tree3"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeFront tree4"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeFront tree5"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeFront tree6"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeFront tree7"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeFront tree8"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeFront tree9"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
+            <div class="tree treeFront tree10"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
         </div>
-
-        <div class="mountain">
-            <div class="backdrop"></div>
-            <div class="zig zag1"></div>
-            <div class="zig zag2"></div>
-            <div class="zig zag3"></div>
-            <div class="zig zag4"></div>
-        </div>
-
-        <!-- Back Layer Trees -->
-        <div class="tree treeBack tree1"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeBack tree2"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeBack tree3"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeBack tree4"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeBack tree5"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeBack tree6"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeBack tree7"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeBack tree8"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeBack tree9"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeBack tree10"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeBack tree11"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-
-        <!-- Mid Layer Trees -->
-        <div class="tree treeMid tree1"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeMid tree2"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeMid tree3"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeMid tree4"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeMid tree5"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeMid tree6"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeMid tree7"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeMid tree8"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeMid tree9"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeMid tree10"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-
-        <!-- Front Layer Trees -->
-        <div class="tree treeFront tree1"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeFront tree2"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeFront tree3"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeFront tree4"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeFront tree5"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeFront tree6"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeFront tree7"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeFront tree8"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeFront tree9"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
-        <div class="tree treeFront tree10"><div class="top"></div><div class="mid"></div><div class="bot"></div><div class="base"></div></div>
     </div>
-</div>
 
-<script>
-    // Global variables
-    let currentMode = 'day';
-    
-    // Initialize the landscape
-    function initializeLandscape() {
-        createStars();
-        updateLandscape();
-        setInterval(updateLandscape, 1000);
-    }
+    <script>
+        // Global variables
+        let currentMode = 'day';
 
-    // Create stars for night sky
-    function createStars() {
-        const starsContainer = document.getElementById('stars');
-        const starCount = 100;
-        
-        for (let i = 0; i < starCount; i++) {
-            const star = document.createElement('div');
-            star.className = 'star';
-            star.style.left = Math.random() * 100 + '%';
-            star.style.top = Math.random() * 100 + '%';
-            star.style.animationDelay = Math.random() * 3 + 's';
-            star.style.animationDuration = (Math.random() * 2 + 2) + 's';
-            starsContainer.appendChild(star);
+        // Initialize the landscape
+        function initializeLandscape() {
+            createStars();
+            updateLandscape();
+            setInterval(updateLandscape, 1000);
         }
-    }
 
-    // Get London time
-    async function getLondonTime() {
-        try {
-            const response = await fetch('https://worldtimeapi.org/api/timezone/Europe/London');
-            const data = await response.json();
-            return new Date(data.datetime);
-        } catch (error) {
-            console.log('Using fallback time calculation');
-            const now = new Date();
-            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-            const isDST = isLondonDST(now);
-            const offset = isDST ? 1 : 0;
-            return new Date(utc + (offset * 3600000));
+        // Create stars for night sky
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 100;
+
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                starsContainer.appendChild(star);
+            }
         }
-    }
 
-    // Check if London is in Daylight Saving Time
-    function isLondonDST(date) {
-        const jan = new Date(date.getFullYear(), 0, 1);
-        const jul = new Date(date.getFullYear(), 6, 1);
-        return date.getTimezoneOffset() < Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
-    }
-
-    // Update the landscape based on London time
-    async function updateLandscape() {
-        const londonTime = await getLondonTime();
-        const hours = londonTime.getHours();
-        const minutes = londonTime.getMinutes();
-        const seconds = londonTime.getSeconds();
-        
-        document.getElementById('londonTime').textContent = 
-            `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        
-        if (hours >= 6 && hours < 18) {
-            setDayMode(hours, minutes);
-        } else if (hours >= 18 && hours < 20) {
-            setSunsetMode(hours, minutes);
-        } else {
-            setNightMode(hours, minutes);
+        // Get London time
+        async function getLondonTime() {
+            try {
+                const response = await fetch('https://worldtimeapi.org/api/timezone/Europe/London');
+                const data = await response.json();
+                return new Date(data.datetime);
+            } catch (error) {
+                console.log('Using fallback time calculation');
+                const now = new Date();
+                const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+                const isDST = isLondonDST(now);
+                const offset = isDST ? 1 : 0;
+                return new Date(utc + (offset * 3600000));
+            }
         }
-    }
 
-    // Day mode (6 AM - 6 PM)
-    function setDayMode(hours, minutes) {
-        currentMode = 'day';
-        document.getElementById('currentMode').textContent = 'Day';
-        
-        const root = document.documentElement;
-        root.style.setProperty('--sky-color-1', '#87CEEB');
-        root.style.setProperty('--sky-color-2', '#E0F6FF');
-        root.style.setProperty('--sky-color-3', '#98D8E8');
-        root.style.setProperty('--mountain1', '#696969');
-        root.style.setProperty('--mountain2', '#A9A9A9');
-        root.style.setProperty('--tree1', '#228B22');
-        root.style.setProperty('--tree2', '#32CD32');
-        root.style.setProperty('--tree3', '#006400');
-        
-        const sunProgress = ((hours - 6) * 60 + minutes) / (12 * 60);
-        const sunX = sunProgress * 80 + 10;
-        const sunY = Math.sin(sunProgress * Math.PI) * 30 + 10;
-        
-        const sun = document.getElementById('sun');
-        sun.style.left = sunX + '%';
-        sun.style.top = sunY + '%';
-        sun.style.opacity = '1';
-        
-        document.getElementById('moon').style.opacity = '0';
-        document.getElementById('stars').style.opacity = '0';
-        document.getElementById('cloud1').style.opacity = '0.8';
-        document.getElementById('cloud2').style.opacity = '0.8';
-    }
+        // Check if London is in Daylight Saving Time
+        function isLondonDST(date) {
+            const jan = new Date(date.getFullYear(), 0, 1);
+            const jul = new Date(date.getFullYear(), 6, 1);
+            return date.getTimezoneOffset() < Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
+        }
 
-    // Sunset mode (6 PM - 8 PM)
-    function setSunsetMode(hours, minutes) {
-        currentMode = 'sunset';
-        document.getElementById('currentMode').textContent = 'Sunset';
-        
-        const root = document.documentElement;
-        root.style.setProperty('--sky-color-1', '#FF6B35');
-        root.style.setProperty('--sky-color-2', '#F7931E');
-        root.style.setProperty('--sky-color-3', '#FFB347');
-        root.style.setProperty('--mountain1', '#8B4513');
-        root.style.setProperty('--mountain2', '#CD853F');
-        root.style.setProperty('--tree1', '#8B4513');
-        root.style.setProperty('--tree2', '#A0522D');
-        root.style.setProperty('--tree3', '#654321');
-        
-        const sunsetProgress = ((hours - 18) * 60 + minutes) / (2 * 60);
-        const sunX = 20 - sunsetProgress * 10;
-        const sunY = 60 + sunsetProgress * 30;
-        
-        const sun = document.getElementById('sun');
-        sun.style.left = sunX + '%';
-        sun.style.top = sunY + '%';
-        sun.style.opacity = 1 - sunsetProgress * 0.5;
-        
-        const moon = document.getElementById('moon');
-        moon.style.left = (70 + sunsetProgress * 10) + '%';
-        moon.style.top = (20 - sunsetProgress * 10) + '%';
-        moon.style.opacity = sunsetProgress * 0.8;
-        
-        document.getElementById('stars').style.opacity = sunsetProgress * 0.5;
-        document.getElementById('cloud1').style.opacity = '0.6';
-        document.getElementById('cloud2').style.opacity = '0.6';
-    }
+        // Update the landscape based on London time
+        async function updateLandscape() {
+            const londonTime = await getLondonTime();
+            const hours = londonTime.getHours();
+            const minutes = londonTime.getMinutes();
+            const seconds = londonTime.getSeconds();
 
-    // Night mode (8 PM - 6 AM)
-    function setNightMode(hours, minutes) {
-        currentMode = 'night';
-        document.getElementById('currentMode').textContent = 'Night';
-        
-        const root = document.documentElement;
-        root.style.setProperty('--sky-color-1', '#191970');
-        root.style.setProperty('--sky-color-2', '#000080');
-        root.style.setProperty('--sky-color-3', '#483D8B');
-        root.style.setProperty('--mountain1', '#2F2F2F');
-        root.style.setProperty('--mountain2', '#404040');
-        root.style.setProperty('--tree1', '#2D1427');
-        root.style.setProperty('--tree2', '#5A0831');
-        root.style.setProperty('--tree3', '#1A0A0F');
-        
-        document.getElementById('sun').style.opacity = '0';
-        
-        const nightProgress = hours >= 20 ? (hours - 20) / 10 : (hours + 4) / 10;
-        const moon = document.getElementById('moon');
-        moon.style.left = (20 + nightProgress * 60) + '%';
-        moon.style.top = (10 + Math.sin(nightProgress * Math.PI) * 20) + '%';
-        moon.style.opacity = '1';
-        
-        document.getElementById('stars').style.opacity = '1';
-        document.getElementById('cloud1').style.opacity = '0.2';
-        document.getElementById('cloud2').style.opacity = '0.2';
-    }
+            document.getElementById('londonTime').textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
-    // Start the application
-    window.addEventListener('load', initializeLandscape);
-</script>
-```
+            if (hours >= 6 && hours < 18) {
+                setDayMode(hours, minutes);
+            } else if (hours >= 18 && hours < 20) {
+                setSunsetMode(hours, minutes);
+            } else {
+                setNightMode(hours, minutes);
+            }
+        }
 
+        // Day mode (6 AM - 6 PM)
+        function setDayMode(hours, minutes) {
+            currentMode = 'day';
+            document.getElementById('currentMode').textContent = 'Day';
+
+            const root = document.documentElement;
+            root.style.setProperty('--sky-color-1', '#87CEEB');
+            root.style.setProperty('--sky-color-2', '#E0F6FF');
+            root.style.setProperty('--sky-color-3', '#98D8E8');
+            root.style.setProperty('--mountain1', '#696969');
+            root.style.setProperty('--mountain2', '#A9A9A9');
+            root.style.setProperty('--tree1', '#228B22');
+            root.style.setProperty('--tree2', '#32CD32');
+            root.style.setProperty('--tree3', '#006400');
+
+            // Sun positioning based on example logic (left/top and rotation if needed)
+            const sunProgress = ((hours - 6) * 60 + minutes) / (12 * 60); // 0 to 1 over 12 hours
+            const sunX = 10 + (sunProgress * 80); // Move from 10% to 90% horizontally
+            const sunY = 70 - (Math.sin(sunProgress * Math.PI) * 60); // Arc movement
+            
+            const sun = document.getElementById('sun');
+            sun.style.left = sunX + '%';
+            sun.style.top = sunY + '%';
+            sun.style.opacity = '1';
+            // You can add rotation here if you want the sun to 'spin' or show a different orientation
+            // For example: sun.style.transform = `rotate(${sunProgress * 360}deg)`;
+
+            document.getElementById('moon').style.opacity = '0';
+            document.getElementById('stars').style.opacity = '0';
+            document.getElementById('cloud1').style.opacity = '0.8';
+            document.getElementById('cloud2').style.opacity = '0.8';
+        }
+
+        // Sunset mode (6 PM - 8 PM)
+        function setSunsetMode(hours, minutes) {
+            currentMode = 'sunset';
+            document.getElementById('currentMode').textContent = 'Sunset';
+
+            const root = document.documentElement;
+            root.style.setProperty('--sky-color-1', '#FF6B35');
+            root.style.setProperty('--sky-color-2', '#F7931E');
+            root.style.setProperty('--sky-color-3', '#FFB347');
+            root.style.setProperty('--mountain1', '#8B4513');
+            root.style.setProperty('--mountain2', '#CD853F');
+            root.style.setProperty('--tree1', '#8B4513');
+            root.style.setProperty('--tree2', '#A0522D');
+            root.style.setProperty('--tree3', '#654321');
+
+            const sunsetProgress = ((hours - 18) * 60 + minutes) / (2 * 60); // 0 to 1 over 2 hours
+
+            // Sun positioning during sunset
+            const sun = document.getElementById('sun');
+            sun.style.left = (90 - sunsetProgress * 70) + '%'; // Moves from right to left
+            sun.style.top = (70 + sunsetProgress * 20) + '%'; // Moves towards bottom
+            sun.style.opacity = 1 - sunsetProgress * 0.8; // Fades out
+
+            // Moon positioning during sunset
+            const moon = document.getElementById('moon');
+            moon.style.left = (20 + sunsetProgress * 60) + '%'; // Moves from left to right
+            moon.style.top = (90 - sunsetProgress * 70) + '%'; // Moves from bottom to top
+            moon.style.opacity = sunsetProgress; // Fades in
+
+            document.getElementById('stars').style.opacity = sunsetProgress * 0.5;
+            document.getElementById('cloud1').style.opacity = '0.6';
+            document.getElementById('cloud2').style.opacity = '0.6';
+        }
+
+        // Night mode (8 PM - 6 AM)
+        function setNightMode(hours, minutes) {
+            currentMode = 'night';
+            document.getElementById('currentMode').textContent = 'Night';
+
+            const root = document.documentElement;
+            root.style.setProperty('--sky-color-1', '#191970');
+            root.style.setProperty('--sky-color-2', '#000080');
+            root.style.setProperty('--sky-color-3', '#483D8B');
+            root.style.setProperty('--mountain1', '#2F2F2F');
+            root.style.setProperty('--mountain2', '#404040');
+            root.style.setProperty('--tree1', '#2D1427');
+            root.style.setProperty('--tree2', '#5A0831');
+            root.style.setProperty('--tree3', '#1A0A0F');
+
+            document.getElementById('sun').style.opacity = '0';
+
+            // Calculate night progress (0 to 1 over 10 hours)
+            let nightProgress;
+            if (hours >= 20) { // 8 PM to midnight
+                nightProgress = (hours - 20) / 10 + (minutes / 60) / 10;
+            } else { // Midnight to 6 AM
+                nightProgress = (hours + 4) / 10 + (minutes / 60) / 10;
+            }
+
+            // Moon positioning during night
+            const moon = document.getElementById('moon');
+            moon.style.left = (10 + nightProgress * 80) + '%'; // Moves from left to right
+            moon.style.top = (10 + Math.sin(nightProgress * Math.PI) * 20) + '%'; // Arc movement
+            moon.style.opacity = '1';
+
+            document.getElementById('stars').style.opacity = '1';
+            document.getElementById('cloud1').style.opacity = '0.2';
+            document.getElementById('cloud2').style.opacity = '0.2';
+        }
+
+        // Start the application
+        window.addEventListener('load', initializeLandscape);
+    </script>
 </body>
 </html>
